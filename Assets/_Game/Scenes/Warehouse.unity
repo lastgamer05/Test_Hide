@@ -503,6 +503,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 569208995}
+  - {fileID: 2114994208}
+  - {fileID: 764379971}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &106722271
@@ -525,6 +527,9 @@ MonoBehaviour:
   navMeshSurface: {fileID: 1145643630}
   playerVision: {fileID: 3792751515875511883}
   maskRenderer: {fileID: 569208994}
+  scentField: {fileID: 2114994207}
+  scentCellSize: 1
+  senseHud: {fileID: 764379970}
   movePlayerToStart: 1
   runInBackground: 1
 --- !u!114 &106722272
@@ -5250,6 +5255,54 @@ Transform:
   m_Children: []
   m_Father: {fileID: 903834326}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &764379969
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 764379971}
+  - component: {fileID: 764379970}
+  m_Layer: 0
+  m_Name: SenseHud
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &764379970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 764379969}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25670ba31e91c8443b4ce38ad3109c54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.SenseHud
+  style: {fileID: 0}
+  sortingOrder: 100
+  refreshInterval: 0.12
+  autoBindOnStart: 1
+--- !u!4 &764379971
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 764379969}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 106722270}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &765954066
 GameObject:
   m_ObjectHideFlags: 0
@@ -7356,6 +7409,8 @@ GameObject:
   - component: {fileID: 1034100559}
   - component: {fileID: 1034100558}
   - component: {fileID: 1034100562}
+  - component: {fileID: 1034100563}
+  - component: {fileID: 1034100564}
   m_Layer: 13
   m_Name: Guard_3
   m_TagString: Untagged
@@ -7423,10 +7478,14 @@ MonoBehaviour:
   profile: {fileID: 11400000, guid: a7bc11a68b2b36f4faebbf33895d7b87, type: 2}
   blockers:
     serializedVersion: 2
-    m_Bits: 3584
+    m_Bits: 1536
+  lowCover:
+    serializedVersion: 2
+    m_Bits: 2048
   eye: {fileID: 0}
   targetHeight: 1
   farDetectScale: 0.3
+  hearingMemory: 0.35
   initialPlayer: {fileID: 0}
   initialExposure: {fileID: 0}
 --- !u!114 &1034100560
@@ -7481,6 +7540,41 @@ MonoBehaviour:
   sampleHeight: 1.2
   checkInterval: 0.05
   hideDelay: 0.2
+--- !u!114 &1034100563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034100556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 556a1f6ddb5dcaa4fb49c362ae1baab5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Senses.NoiseEmitter
+  strideLength: 0.9
+  footstepLoudness: 0.4
+  radiusPerLoudness: 12
+  crouchScale: 0.35
+  walkScale: 1
+  runScale: 1.9
+  moveThreshold: 0.15
+  runSpeedThreshold: 5
+  loudnessFade: 0.35
+--- !u!114 &1034100564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034100556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21b97ccd3c308f3409342386d18dfa84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Senses.ScentSource
+  strength: 1
+  ownerIdOverride: 0
 --- !u!1 &1039596464
 GameObject:
   m_ObjectHideFlags: 0
@@ -15973,6 +16067,8 @@ GameObject:
   - component: {fileID: 2041584593}
   - component: {fileID: 2041584592}
   - component: {fileID: 2041584596}
+  - component: {fileID: 2041584597}
+  - component: {fileID: 2041584598}
   m_Layer: 13
   m_Name: Guard_2
   m_TagString: Untagged
@@ -16040,10 +16136,14 @@ MonoBehaviour:
   profile: {fileID: 11400000, guid: a7bc11a68b2b36f4faebbf33895d7b87, type: 2}
   blockers:
     serializedVersion: 2
-    m_Bits: 3584
+    m_Bits: 1536
+  lowCover:
+    serializedVersion: 2
+    m_Bits: 2048
   eye: {fileID: 0}
   targetHeight: 1
   farDetectScale: 0.3
+  hearingMemory: 0.35
   initialPlayer: {fileID: 0}
   initialExposure: {fileID: 0}
 --- !u!114 &2041584594
@@ -16098,6 +16198,41 @@ MonoBehaviour:
   sampleHeight: 1.2
   checkInterval: 0.05
   hideDelay: 0.2
+--- !u!114 &2041584597
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041584590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 556a1f6ddb5dcaa4fb49c362ae1baab5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Senses.NoiseEmitter
+  strideLength: 0.9
+  footstepLoudness: 0.4
+  radiusPerLoudness: 12
+  crouchScale: 0.35
+  walkScale: 1
+  runScale: 1.9
+  moveThreshold: 0.15
+  runSpeedThreshold: 5
+  loudnessFade: 0.35
+--- !u!114 &2041584598
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041584590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21b97ccd3c308f3409342386d18dfa84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Senses.ScentSource
+  strength: 1
+  ownerIdOverride: 0
 --- !u!1 &2083004137
 GameObject:
   m_ObjectHideFlags: 0
@@ -16317,6 +16452,8 @@ GameObject:
   - component: {fileID: 2108297460}
   - component: {fileID: 2108297459}
   - component: {fileID: 2108297463}
+  - component: {fileID: 2108297464}
+  - component: {fileID: 2108297465}
   m_Layer: 13
   m_Name: Guard_1
   m_TagString: Untagged
@@ -16384,10 +16521,14 @@ MonoBehaviour:
   profile: {fileID: 11400000, guid: a7bc11a68b2b36f4faebbf33895d7b87, type: 2}
   blockers:
     serializedVersion: 2
-    m_Bits: 3584
+    m_Bits: 1536
+  lowCover:
+    serializedVersion: 2
+    m_Bits: 2048
   eye: {fileID: 0}
   targetHeight: 1
   farDetectScale: 0.3
+  hearingMemory: 0.35
   initialPlayer: {fileID: 0}
   initialExposure: {fileID: 0}
 --- !u!114 &2108297461
@@ -16442,6 +16583,97 @@ MonoBehaviour:
   sampleHeight: 1.2
   checkInterval: 0.05
   hideDelay: 0.2
+--- !u!114 &2108297464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2108297457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 556a1f6ddb5dcaa4fb49c362ae1baab5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Senses.NoiseEmitter
+  strideLength: 0.9
+  footstepLoudness: 0.4
+  radiusPerLoudness: 12
+  crouchScale: 0.35
+  walkScale: 1
+  runScale: 1.9
+  moveThreshold: 0.15
+  runSpeedThreshold: 5
+  loudnessFade: 0.35
+--- !u!114 &2108297465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2108297457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21b97ccd3c308f3409342386d18dfa84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Senses.ScentSource
+  strength: 1
+  ownerIdOverride: 0
+--- !u!1 &2114994206
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2114994208}
+  - component: {fileID: 2114994207}
+  m_Layer: 0
+  m_Name: ScentField
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2114994207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2114994206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e326cc631f3b0ff48a240981ab594b2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Senses.ScentField
+  updateInterval: 0.2
+  wind: {fileID: 11400000, guid: 8eaff3559a124b64e89eb18af6b28787, type: 2}
+  depositPerSecond: 2
+  decayPerSecond: 0.35
+  spreadPerStep: 0.18
+  minStrength: 0.004
+  maxActiveCells: 4096
+  maxGridCells: 262144
+  autoConfigureOnStart: 1
+  defaultWorldMin: {x: -64, y: 0, z: -64}
+  defaultWorldSize: {x: 128, y: 8, z: 128}
+  defaultCellSize: 1
+--- !u!4 &2114994208
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2114994206}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 106722270}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2131832952
 GameObject:
   m_ObjectHideFlags: 0
@@ -16620,6 +16852,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2612988849310483947, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3792751515875511883}
+    - targetCorrespondingSourceObject: {fileID: 2612988849310483947, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3792751515875511885}
+    - targetCorrespondingSourceObject: {fileID: 2612988849310483947, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3792751515875511886}
   m_SourcePrefab: {fileID: 100100000, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
 --- !u!1 &3792751515875511879 stripped
 GameObject:
@@ -16650,10 +16888,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Player.PlayerExposure
   motor: {fileID: 3792751515875511880}
+  stance: {fileID: 3792751515875511882}
+  emitter: {fileID: 0}
+  standingBodyHeight: 1
+  crouchingBodyHeight: 0.55
   sightBlockers:
     serializedVersion: 2
     m_Bits: 3584
   lightFollowSpeed: 6
+  scentSource: {fileID: 0}
+  scentField: {fileID: 0}
+  standingScent: 1
+  crouchingScent: 0.6
 --- !u!114 &3792751515875511882 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 9196453565656394564, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
@@ -16690,6 +16936,41 @@ MonoBehaviour:
   nearRadius: 2.4
   rayCount: 96
   updateInterval: 0
+--- !u!114 &3792751515875511885
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3792751515875511879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 556a1f6ddb5dcaa4fb49c362ae1baab5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Senses.NoiseEmitter
+  strideLength: 0.9
+  footstepLoudness: 0.4
+  radiusPerLoudness: 12
+  crouchScale: 0.35
+  walkScale: 1
+  runScale: 1.9
+  moveThreshold: 0.15
+  runSpeedThreshold: 5
+  loudnessFade: 0.35
+--- !u!114 &3792751515875511886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3792751515875511879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21b97ccd3c308f3409342386d18dfa84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Senses.ScentSource
+  strength: 1
+  ownerIdOverride: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

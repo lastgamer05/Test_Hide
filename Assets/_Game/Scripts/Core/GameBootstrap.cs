@@ -24,6 +24,12 @@ namespace ByAWhisker.Core
         [SerializeField] private PlayerVision playerVision;
         [Tooltip("시야 마스크를 그리는 쪽. 레벨 크기를 시작할 때 알려준다.")]
         [SerializeField] private VisibilityMaskRenderer maskRenderer;
+        [Tooltip("냄새 격자. 이쪽도 레벨 크기를 받아야 한다.")]
+        [SerializeField] private ByAWhisker.Senses.ScentField scentField;
+        [Tooltip("냄새 격자 한 칸의 크기(m). 레벨 격자와 무관하게 정한다.")]
+        [SerializeField] private float scentCellSize = 1f;
+        [Tooltip("감각 표시. 소음, 빛, 소리 방향, 냄새 점을 띄운다.")]
+        [SerializeField] private ByAWhisker.UI.SenseHud senseHud;
         [SerializeField] private bool movePlayerToStart = true;
         [Tooltip("에디터 창이 뒤에 있어도 플레이 모드가 계속 돌게 한다. 자동 확인에 필요하다.")]
         [SerializeField] private bool runInBackground = true;
@@ -63,10 +69,12 @@ namespace ByAWhisker.Core
             GameEvents.RunReset -= OnRunReset;
         }
 
-        /// <summary>다시 시작하면 지형을 본 기억도 지운다.</summary>
+        /// <summary>다시 시작하면 지형을 본 기억과 남은 소리, 남은 냄새도 지운다.</summary>
         private void OnRunReset()
         {
             if (maskRenderer != null) maskRenderer.ClearMemory();
+            if (scentField != null) scentField.Clear();
+            ByAWhisker.Senses.NoiseBus.Clear();
         }
 
         /// <summary>
@@ -81,7 +89,7 @@ namespace ByAWhisker.Core
             EnemyVisibility[] enemies = FindObjectsByType<EnemyVisibility>(FindObjectsSortMode.None);
             for (int i = 0; i < enemies.Length; i++) enemies[i].Bind(playerVision);
 
-            if (maskRenderer == null) return;
+            if (playerExposure != null && scentField != null) playerExposure.SetScentField(scentField);
 
             GridMap grid = Grid;
             if (grid == null) return;
@@ -92,7 +100,21 @@ namespace ByAWhisker.Core
             Vector3 worldMin = new Vector3(-margin, 0f, -margin);
             Vector3 worldSize = new Vector3(size.x + margin * 2f, 6f, size.z + margin * 2f);
 
-            maskRenderer.Configure(worldMin, worldSize);
+            if (maskRenderer != null) maskRenderer.Configure(worldMin, worldSize);
+            if (scentField != null) scentField.Configure(worldMin, worldSize, scentCellSize);
+
+            BindHud();
+        }
+
+        /// <summary>감각 표시는 격자가 잡힌 뒤에 연결한다. 그래야 첫 프레임부터 냄새 점이 제자리에 뜬다.</summary>
+        private void BindHud()
+        {
+            if (senseHud == null || player == null) return;
+
+            Camera cam = viewCamera != null ? viewCamera.GetComponent<Camera>() : Camera.main;
+            senseHud.Bind(player, cam);
+            senseHud.SetExposure(playerExposure);
+            senseHud.SetScentField(scentField);
         }
 
         /// <summary>

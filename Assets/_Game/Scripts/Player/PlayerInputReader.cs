@@ -20,12 +20,24 @@ namespace ByAWhisker.Player
         private InputAction _point;
         private InputAction _rotateLeft;
         private InputAction _rotateRight;
+        private InputAction _fire;
+        private InputAction _reload;
+        private InputAction _takedown;
 
         /// <summary>앉기 전환을 눌렀다.</summary>
         public event Action CrouchToggled;
 
         /// <summary>카메라 회전 요청. -1은 왼쪽, +1은 오른쪽.</summary>
         public event Action<int> CameraRotateRequested;
+
+        /// <summary>재장전을 눌렀다.</summary>
+        public event Action ReloadRequested;
+
+        /// <summary>제압을 눌렀다.</summary>
+        public event Action TakedownRequested;
+
+        /// <summary>사격은 누르고 있는 동안 계속 쏠 수 있어야 해서 이벤트가 아니라 상태로 준다.</summary>
+        public bool FireHeld { get { return _fire != null && _fire.IsPressed(); } }
 
         public Vector2 Move { get { return _move != null ? _move.ReadValue<Vector2>() : Vector2.zero; } }
         public bool RunHeld { get { return _run != null && _run.IsPressed(); } }
@@ -46,6 +58,9 @@ namespace ByAWhisker.Player
             _point = _map.FindAction("Point", true);
             _rotateLeft = _map.FindAction("RotateLeft", true);
             _rotateRight = _map.FindAction("RotateRight", true);
+            _fire = _map.FindAction("Fire", true);
+            _reload = _map.FindAction("Reload", true);
+            _takedown = _map.FindAction("Takedown", true);
         }
 
         private void OnEnable()
@@ -55,6 +70,8 @@ namespace ByAWhisker.Player
             _crouch.performed += OnCrouch;
             _rotateLeft.performed += OnRotateLeft;
             _rotateRight.performed += OnRotateRight;
+            _reload.performed += OnReload;
+            _takedown.performed += OnTakedown;
             _map.Enable();
         }
 
@@ -65,6 +82,8 @@ namespace ByAWhisker.Player
             _crouch.performed -= OnCrouch;
             _rotateLeft.performed -= OnRotateLeft;
             _rotateRight.performed -= OnRotateRight;
+            _reload.performed -= OnReload;
+            _takedown.performed -= OnTakedown;
             _map.Disable();
         }
 
@@ -81,6 +100,16 @@ namespace ByAWhisker.Player
         private void OnRotateRight(InputAction.CallbackContext context)
         {
             if (CameraRotateRequested != null) CameraRotateRequested(1);
+        }
+
+        private void OnReload(InputAction.CallbackContext context)
+        {
+            if (ReloadRequested != null) ReloadRequested();
+        }
+
+        private void OnTakedown(InputAction.CallbackContext context)
+        {
+            if (TakedownRequested != null) TakedownRequested();
         }
     }
 }

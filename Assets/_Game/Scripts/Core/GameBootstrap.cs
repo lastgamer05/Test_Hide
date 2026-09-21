@@ -133,6 +133,10 @@ namespace ByAWhisker.Core
 
                 GuardMotor motor = guards[i].GetComponent<GuardMotor>();
                 if (motor != null) motor.Warp(guards[i].transform.position, guards[i].transform.rotation);
+
+                // 감각과 사격이 같은 대상을 봐야 한다. 다르면 엉뚱한 곳을 겨누고 쏜다.
+                GuardGunner gunner = guards[i].GetComponent<GuardGunner>();
+                if (gunner != null) gunner.Bind(player);
             }
 
             if (guards.Length > 0) Debug.Log("경비 " + guards.Length + "명 연결됨");

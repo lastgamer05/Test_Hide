@@ -7411,6 +7411,11 @@ GameObject:
   - component: {fileID: 1034100562}
   - component: {fileID: 1034100563}
   - component: {fileID: 1034100564}
+  - component: {fileID: 1034100568}
+  - component: {fileID: 1034100567}
+  - component: {fileID: 1034100566}
+  - component: {fileID: 1034100565}
+  - component: {fileID: 1034100569}
   m_Layer: 13
   m_Name: Guard_3
   m_TagString: Untagged
@@ -7450,6 +7455,7 @@ MonoBehaviour:
   motor: {fileID: 0}
   perception: {fileID: 0}
   route: {fileID: 1349541170}
+  gunner: {fileID: 1034100567}
   patrolSpeed: 1.6
   searchSpeed: 2.4
   chaseSpeed: 3.8
@@ -7575,6 +7581,104 @@ MonoBehaviour:
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Senses.ScentSource
   strength: 1
   ownerIdOverride: 0
+--- !u!114 &1034100565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034100556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48ed057a730e78b459e38a3fbd53ee06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.Damageable
+  isPlayer: 0
+  corpseScent: 0.85
+  disableWhenDown: []
+  keepEnabled: []
+  reviveOnRunReset: 1
+--- !u!114 &1034100566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034100556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b554cafbe7ebc84082d597460edec6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.AimTelegraph
+  gunner: {fileID: 0}
+  aimColor: {r: 1, g: 0.72, b: 0.32, a: 0.55}
+  readyColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  flashColor: {r: 1, g: 0.95, b: 0.82, a: 1}
+  tailAlpha: 0.35
+  aimWidth: 0.02
+  readyWidth: 0.06
+  groundOffset: 0.06
+  fadeSeconds: 0.15
+  flashSeconds: 0.08
+  lineMaterial: {fileID: 0}
+--- !u!114 &1034100567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034100556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee090f15119e61b4ebce0172143ec5d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.GuardGunner
+  settings: {fileID: 11400000, guid: b0ef125e07490e64bbc3491fae4a9704, type: 2}
+  weapon: {fileID: 0}
+  perception: {fileID: 0}
+  muzzle: {fileID: 0}
+  targetHeight: 1
+--- !u!114 &1034100568
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034100556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19915b388d3e2aa43a1ccdb2ff3ff0be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.Weapon
+  settings: {fileID: 11400000, guid: c40b0839841d8c441830ca6b8aa242b4, type: 2}
+  hitMask:
+    serializedVersion: 2
+    m_Bits: 15872
+  suppressedNoiseScale: 0.15
+  noise: {fileID: 0}
+--- !u!136 &1034100569
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034100556}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.32
+  m_Height: 1.8
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!1 &1039596464
 GameObject:
   m_ObjectHideFlags: 0
@@ -8713,7 +8817,7 @@ MonoBehaviour:
   m_Center: {x: 0, y: 2, z: 0}
   m_LayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 4294955007
   m_UseGeometry: 1
   m_DefaultArea: 0
   m_GenerateLinks: 0
@@ -16069,6 +16173,11 @@ GameObject:
   - component: {fileID: 2041584596}
   - component: {fileID: 2041584597}
   - component: {fileID: 2041584598}
+  - component: {fileID: 2041584602}
+  - component: {fileID: 2041584601}
+  - component: {fileID: 2041584600}
+  - component: {fileID: 2041584599}
+  - component: {fileID: 2041584603}
   m_Layer: 13
   m_Name: Guard_2
   m_TagString: Untagged
@@ -16108,6 +16217,7 @@ MonoBehaviour:
   motor: {fileID: 0}
   perception: {fileID: 0}
   route: {fileID: 1005255938}
+  gunner: {fileID: 2041584601}
   patrolSpeed: 1.6
   searchSpeed: 2.4
   chaseSpeed: 3.8
@@ -16233,6 +16343,104 @@ MonoBehaviour:
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Senses.ScentSource
   strength: 1
   ownerIdOverride: 0
+--- !u!114 &2041584599
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041584590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48ed057a730e78b459e38a3fbd53ee06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.Damageable
+  isPlayer: 0
+  corpseScent: 0.85
+  disableWhenDown: []
+  keepEnabled: []
+  reviveOnRunReset: 1
+--- !u!114 &2041584600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041584590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b554cafbe7ebc84082d597460edec6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.AimTelegraph
+  gunner: {fileID: 0}
+  aimColor: {r: 1, g: 0.72, b: 0.32, a: 0.55}
+  readyColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  flashColor: {r: 1, g: 0.95, b: 0.82, a: 1}
+  tailAlpha: 0.35
+  aimWidth: 0.02
+  readyWidth: 0.06
+  groundOffset: 0.06
+  fadeSeconds: 0.15
+  flashSeconds: 0.08
+  lineMaterial: {fileID: 0}
+--- !u!114 &2041584601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041584590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee090f15119e61b4ebce0172143ec5d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.GuardGunner
+  settings: {fileID: 11400000, guid: b0ef125e07490e64bbc3491fae4a9704, type: 2}
+  weapon: {fileID: 0}
+  perception: {fileID: 0}
+  muzzle: {fileID: 0}
+  targetHeight: 1
+--- !u!114 &2041584602
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041584590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19915b388d3e2aa43a1ccdb2ff3ff0be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.Weapon
+  settings: {fileID: 11400000, guid: c40b0839841d8c441830ca6b8aa242b4, type: 2}
+  hitMask:
+    serializedVersion: 2
+    m_Bits: 15872
+  suppressedNoiseScale: 0.15
+  noise: {fileID: 0}
+--- !u!136 &2041584603
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041584590}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.32
+  m_Height: 1.8
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!1 &2083004137
 GameObject:
   m_ObjectHideFlags: 0
@@ -16454,6 +16662,11 @@ GameObject:
   - component: {fileID: 2108297463}
   - component: {fileID: 2108297464}
   - component: {fileID: 2108297465}
+  - component: {fileID: 2108297469}
+  - component: {fileID: 2108297468}
+  - component: {fileID: 2108297467}
+  - component: {fileID: 2108297466}
+  - component: {fileID: 2108297470}
   m_Layer: 13
   m_Name: Guard_1
   m_TagString: Untagged
@@ -16493,6 +16706,7 @@ MonoBehaviour:
   motor: {fileID: 0}
   perception: {fileID: 0}
   route: {fileID: 903834325}
+  gunner: {fileID: 2108297468}
   patrolSpeed: 1.6
   searchSpeed: 2.4
   chaseSpeed: 3.8
@@ -16618,6 +16832,104 @@ MonoBehaviour:
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Senses.ScentSource
   strength: 1
   ownerIdOverride: 0
+--- !u!114 &2108297466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2108297457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48ed057a730e78b459e38a3fbd53ee06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.Damageable
+  isPlayer: 0
+  corpseScent: 0.85
+  disableWhenDown: []
+  keepEnabled: []
+  reviveOnRunReset: 1
+--- !u!114 &2108297467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2108297457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b554cafbe7ebc84082d597460edec6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.AimTelegraph
+  gunner: {fileID: 0}
+  aimColor: {r: 1, g: 0.72, b: 0.32, a: 0.55}
+  readyColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  flashColor: {r: 1, g: 0.95, b: 0.82, a: 1}
+  tailAlpha: 0.35
+  aimWidth: 0.02
+  readyWidth: 0.06
+  groundOffset: 0.06
+  fadeSeconds: 0.15
+  flashSeconds: 0.08
+  lineMaterial: {fileID: 0}
+--- !u!114 &2108297468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2108297457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee090f15119e61b4ebce0172143ec5d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.GuardGunner
+  settings: {fileID: 11400000, guid: b0ef125e07490e64bbc3491fae4a9704, type: 2}
+  weapon: {fileID: 0}
+  perception: {fileID: 0}
+  muzzle: {fileID: 0}
+  targetHeight: 1
+--- !u!114 &2108297469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2108297457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19915b388d3e2aa43a1ccdb2ff3ff0be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.Weapon
+  settings: {fileID: 11400000, guid: c40b0839841d8c441830ca6b8aa242b4, type: 2}
+  hitMask:
+    serializedVersion: 2
+    m_Bits: 15872
+  suppressedNoiseScale: 0.15
+  noise: {fileID: 0}
+--- !u!136 &2108297470
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2108297457}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.32
+  m_Height: 1.8
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!1 &2114994206
 GameObject:
   m_ObjectHideFlags: 0
@@ -16858,6 +17170,18 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2612988849310483947, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3792751515875511886}
+    - targetCorrespondingSourceObject: {fileID: 2612988849310483947, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3792751515875511890}
+    - targetCorrespondingSourceObject: {fileID: 2612988849310483947, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3792751515875511889}
+    - targetCorrespondingSourceObject: {fileID: 2612988849310483947, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3792751515875511888}
+    - targetCorrespondingSourceObject: {fileID: 2612988849310483947, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3792751515875511887}
   m_SourcePrefab: {fileID: 100100000, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
 --- !u!1 &3792751515875511879 stripped
 GameObject:
@@ -16971,6 +17295,86 @@ MonoBehaviour:
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Senses.ScentSource
   strength: 1
   ownerIdOverride: 0
+--- !u!114 &3792751515875511887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3792751515875511879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1aae522dadb955347a1f772ba2edecc3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Player.PlayerCombat
+  input: {fileID: 0}
+  motor: {fileID: 0}
+  stance: {fileID: 0}
+  weapon: {fileID: 0}
+  takedown: {fileID: 0}
+  muzzleHeight: 1.2
+  aimPlaneHeight: 1
+  turnToAim: 1
+--- !u!114 &3792751515875511888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3792751515875511879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b42e9b149e404c044b946f31582374eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.TakedownAction
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 8192
+  range: 1.4
+  backAngle: 100
+  maxCandidates: 8
+  scanInterval: 0.1
+  lethal: 0
+  hitHeight: 1.2
+  noiseLoudness: 0.22
+  noise: {fileID: 0}
+--- !u!114 &3792751515875511889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3792751515875511879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48ed057a730e78b459e38a3fbd53ee06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.Damageable
+  isPlayer: 1
+  corpseScent: 0.85
+  disableWhenDown: []
+  keepEnabled:
+  - {fileID: 3792751515875511883}
+  - {fileID: 3792751515875511881}
+  reviveOnRunReset: 1
+--- !u!114 &3792751515875511890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3792751515875511879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19915b388d3e2aa43a1ccdb2ff3ff0be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.Weapon
+  settings: {fileID: 11400000, guid: dcad055d689aade4b8bb5233d7a1c135, type: 2}
+  hitMask:
+    serializedVersion: 2
+    m_Bits: 15872
+  suppressedNoiseScale: 0.15
+  noise: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

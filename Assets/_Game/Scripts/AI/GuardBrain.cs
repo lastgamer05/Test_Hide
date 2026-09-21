@@ -16,6 +16,8 @@ namespace ByAWhisker.AI
         [SerializeField] private GuardMotor motor;
         [SerializeField] private GuardPerception perception;
         [SerializeField] private PatrolRoute route;
+        [Tooltip("사격 담당. 비어 있으면 예전처럼 붙어서 잡는 것만 한다.")]
+        [SerializeField] private GuardGunner gunner;
 
         [Header("속도")]
         [SerializeField] private float patrolSpeed = 1.6f;
@@ -62,6 +64,7 @@ namespace ByAWhisker.AI
 
             if (motor == null) motor = GetComponent<GuardMotor>();
             if (perception == null) perception = GetComponent<GuardPerception>();
+            if (gunner == null) gunner = GetComponent<GuardGunner>();
 
             Current = State.Patrol;
         }
@@ -80,6 +83,8 @@ namespace ByAWhisker.AI
         public void Stun(float seconds)
         {
             _stunRemaining = Mathf.Max(_stunRemaining, seconds);
+            // 기절 중에 조준선이 남아 있으면 쓰러진 경비가 계속 겨누는 것처럼 보인다.
+            if (gunner != null) gunner.Disengage();
             Enter(State.Stunned);
         }
 
@@ -226,7 +231,8 @@ namespace ByAWhisker.AI
             if (perception.CanSeePlayer) _lostTimer = 0f;
             else _lostTimer += dt;
 
-            if (InAttackRange())
+            // 총을 든 경비는 붙잡지 않고 쏜다. 둘 다 돌면 같은 순간에 두 번 죽는 셈이 된다.
+            if (InAttackRange() && gunner == null)
             {
                 Enter(State.Attack);
                 return;
@@ -236,6 +242,14 @@ namespace ByAWhisker.AI
             if (_lostTimer >= alertLoseSeconds)
             {
                 Enter(State.Search);
+                return;
+            }
+
+            // 겨누는 동안은 걷지 않는다. 걸으면서 쏘면 플레이어가 피할 틈이 없다.
+            if (gunner != null && gunner.IsAiming)
+            {
+                motor.Stop();
+                motor.FaceTowards(perception.LastKnownPosition, turnSpeed);
                 return;
             }
 
@@ -317,6 +331,13 @@ namespace ByAWhisker.AI
                     if (motor != null) motor.Stop();
                     if (perception != null) perception.enabled = false;
                     break;
+            }
+
+            // 총은 쫓는 동안에만 든다. 순찰로 돌아가면 내린다.
+            if (gunner != null)
+            {
+                if (next == State.Alert) gunner.Engage();
+                else gunner.Disengage();
             }
 
             if (StateChanged != null) StateChanged(next);

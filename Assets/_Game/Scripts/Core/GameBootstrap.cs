@@ -4,6 +4,7 @@ using ByAWhisker.AI;
 using ByAWhisker.Cameras;
 using ByAWhisker.Level;
 using ByAWhisker.Player;
+using ByAWhisker.Visibility;
 
 namespace ByAWhisker.Core
 {
@@ -20,6 +21,9 @@ namespace ByAWhisker.Core
         [SerializeField] private PlayerExposure playerExposure;
         [Tooltip("레벨이 런타임에 만들어지므로 NavMesh도 시작할 때 굽는다.")]
         [SerializeField] private NavMeshSurface navMeshSurface;
+        [SerializeField] private PlayerVision playerVision;
+        [Tooltip("시야 마스크를 그리는 쪽. 레벨 크기를 시작할 때 알려준다.")]
+        [SerializeField] private VisibilityMaskRenderer maskRenderer;
         [SerializeField] private bool movePlayerToStart = true;
         [Tooltip("에디터 창이 뒤에 있어도 플레이 모드가 계속 돌게 한다. 자동 확인에 필요하다.")]
         [SerializeField] private bool runInBackground = true;
@@ -46,6 +50,49 @@ namespace ByAWhisker.Core
 
             BindLevelObjects();
             BindGuards();
+            BindVision();
+        }
+
+        private void OnEnable()
+        {
+            GameEvents.RunReset += OnRunReset;
+        }
+
+        private void OnDisable()
+        {
+            GameEvents.RunReset -= OnRunReset;
+        }
+
+        /// <summary>다시 시작하면 지형을 본 기억도 지운다.</summary>
+        private void OnRunReset()
+        {
+            if (maskRenderer != null) maskRenderer.ClearMemory();
+        }
+
+        /// <summary>
+        /// 마스크를 그릴 범위를 레벨 크기로 맞추고, 적에게 플레이어 시야를 알려준다.
+        /// 레벨은 원점에서 +X, +Z 방향으로 자라므로 최소점이 원점이다.
+        /// </summary>
+        private void BindVision()
+        {
+            if (playerVision == null && player != null) playerVision = player.GetComponent<PlayerVision>();
+            if (playerVision == null) return;
+
+            EnemyVisibility[] enemies = FindObjectsByType<EnemyVisibility>(FindObjectsSortMode.None);
+            for (int i = 0; i < enemies.Length; i++) enemies[i].Bind(playerVision);
+
+            if (maskRenderer == null) return;
+
+            GridMap grid = Grid;
+            if (grid == null) return;
+
+            Vector3 size = grid.WorldSize;
+            // 레벨 밖으로 조금 넉넉히 잡는다. 가장자리 벽이 마스크에서 잘리지 않게.
+            const float margin = 4f;
+            Vector3 worldMin = new Vector3(-margin, 0f, -margin);
+            Vector3 worldSize = new Vector3(size.x + margin * 2f, 6f, size.z + margin * 2f);
+
+            maskRenderer.Configure(worldMin, worldSize);
         }
 
         /// <summary>

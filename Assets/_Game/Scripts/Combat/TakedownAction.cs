@@ -15,12 +15,12 @@ namespace ByAWhisker.Combat
         [Tooltip("제압할 수 있는 것이 있는 레이어. Enemy.")]
         [SerializeField] private LayerMask targetLayers;
 
-        [Tooltip("이 거리 안이어야 한다(m). 수평 거리로만 잰다.")]
-        [SerializeField] private float range = 1.4f;
+        [Tooltip("이 거리 안이어야 한다(m). 수평 거리로만 잰다. 두 몸의 반지름을 합치면 0.7m는 그냥 먹히니 넉넉히 잡는다.")]
+        [SerializeField] private float range = 2.1f;
 
-        [Tooltip("대상의 등 뒤로 벌어진 부채꼴(도). 100이면 등 뒤 좌우 50도씩이다.")]
+        [Tooltip("대상의 등 뒤로 벌어진 부채꼴(도). 160이면 등 뒤 좌우 80도씩이다. 경비 시야각이 100도라 이보다 좁으면 앞도 뒤도 아닌 구간이 생긴다.")]
         [Range(0f, 360f)]
-        [SerializeField] private float backAngle = 100f;
+        [SerializeField] private float backAngle = 160f;
 
         [Tooltip("한 번에 살펴볼 후보 수. 좁은 통로에 몇이 겹쳐 서 있어도 이 정도면 넉넉하다.")]
         [SerializeField] private int maxCandidates = 8;
@@ -160,11 +160,22 @@ namespace ByAWhisker.Combat
             Vector3 back = -Forward(target);
             if (Vector3.Angle(back, toAttacker) > backAngle * 0.5f) return false;
 
-            // 마주 본 상대를 조용히 잡을 수는 없다. 기절 중이면 GuardPerception이 스스로 false를 들고 있다.
+            // 마주 본 상대는 잡을 수 없다. 다만 "보인다"는 판정만으로 막으면, 등 뒤에 제대로 섰는데도
+            // 경비가 몸을 트는 한 프레임 때문에 계속 실패한다. 실제로 정면에 들어와 있을 때만 막는다.
             GuardPerception perception = candidate.GetComponent<GuardPerception>();
-            if (perception != null && perception.CanSeePlayer) return false;
+            if (perception != null && perception.CanSeePlayer && InFrontOf(target, from)) return false;
 
             return true;
+        }
+
+        /// <summary>상대의 정면 쪽에 서 있는가. 등 뒤 부채꼴 밖이면서 앞쪽 절반이면 정면으로 본다.</summary>
+        private static bool InFrontOf(Transform target, Vector3 from)
+        {
+            Vector3 toAttacker = from - target.position;
+            toAttacker.y = 0f;
+            if (toAttacker.sqrMagnitude < 0.0001f) return true;
+
+            return Vector3.Angle(Forward(target), toAttacker) < 90f;
         }
 
         /// <summary>수평 정면. 캡슐이 조금 기울어도 등 뒤 판정이 흔들리지 않게 y를 버린다.</summary>

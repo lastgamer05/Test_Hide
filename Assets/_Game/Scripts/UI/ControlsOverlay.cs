@@ -16,6 +16,7 @@ namespace ByAWhisker.UI
         [Tooltip("비우면 씬에서 찾는다.")]
         [SerializeField] private PlayerStance stance;
         [SerializeField] private Weapon weapon;
+        [SerializeField] private TakedownAction takedown;
 
         [Header("보이기")]
         [Tooltip("시작할 때 키 안내를 펼쳐 둘지. 접어도 Tab으로 다시 편다.")]
@@ -76,6 +77,7 @@ namespace ByAWhisker.UI
                 PlayerCombat combat = FindAnyObjectByType<PlayerCombat>();
                 if (combat != null) weapon = combat.GetComponent<Weapon>();
             }
+            if (takedown == null) takedown = FindAnyObjectByType<TakedownAction>();
 
             _font = ResolveFont();
             Build();
@@ -227,6 +229,9 @@ namespace ByAWhisker.UI
 
             string line = posture;
             if (weapon != null) line += weapon.IsReloading ? "    재장전 중" : "    탄약 " + weapon.Ammo;
+
+            // 제압할 수 있는 순간을 알려 준다. 이게 없으면 등 뒤에 섰는지 플레이어가 알 수 없다.
+            if (takedown != null && takedown.HasTarget) line = "F  제압 가능\n" + line;
 
             if (Time.time < _flashUntil) line = _flashText + "\n" + line;
             return line;

@@ -25,13 +25,22 @@ namespace ByAWhisker.Cameras
         [SerializeField] private float rotateSeconds = 0.25f;
 
         [Header("따라가기")]
-        [Tooltip("바라보는 방향으로 초점을 당기는 거리")]
-        [SerializeField] private float lookAhead = 2.5f;
+        [Tooltip("이동 방향으로 초점을 당기는 거리")]
+        [SerializeField] private float lookAhead = 2f;
         [SerializeField] private float focusHeight = 1f;
-        [SerializeField] private float followLerp = 10f;
+        [Tooltip("초점을 따라가는 속도. 낮을수록 부드럽다")]
+        [SerializeField] private float followLerp = 5f;
+        [Tooltip("앞당김 방향이 바뀌는 속도. 낮을수록 방향 전환이 덜 어지럽다")]
+        [SerializeField] private float lookAheadTurnLerp = 2.5f;
+        [Tooltip("이보다 가까운 초점 차이는 무시한다. 제자리 미세 흔들림을 없앤다")]
+        [SerializeField] private float deadZone = 0.35f;
+        [Tooltip("켜면 이동 방향을, 끄면 바라보는 방향을 앞당긴다")]
+        [SerializeField] private bool leadWithMovement = true;
+        [SerializeField] private PlayerMotor motor;
 
         private Camera _camera;
         private Vector3 _focus;
+        private Vector3 _leadDirection;
         private float _currentYaw;
         private float _fromYaw;
         private float _targetYaw;
@@ -79,7 +88,11 @@ namespace ByAWhisker.Cameras
         public void SetTarget(Transform newTarget)
         {
             target = newTarget;
-            if (target != null) SnapToTarget();
+            if (target == null) return;
+
+            if (motor == null) motor = target.GetComponent<PlayerMotor>();
+            _leadDirection = Flatten(target.forward);
+            SnapToTarget();
         }
 
         /// <summary>한 칸 돌린다. -1은 왼쪽, +1은 오른쪽.</summary>
@@ -104,11 +117,46 @@ namespace ByAWhisker.Cameras
             if (target == null) return;
 
             UpdateYaw();
+            UpdateLeadDirection();
 
-            float t = 1f - Mathf.Exp(-followLerp * Time.deltaTime);
-            _focus = Vector3.Lerp(_focus, DesiredFocus(), t);
+            Vector3 desired = DesiredFocus();
+            Vector3 gap = desired - _focus;
+
+            // 죽은 구역 안이면 아예 따라가지 않는다. 제자리에서 카메라가 떠는 걸 막는다.
+            if (gap.sqrMagnitude > deadZone * deadZone)
+            {
+                float t = 1f - Mathf.Exp(-followLerp * Time.deltaTime);
+                _focus = Vector3.Lerp(_focus, desired, t);
+            }
 
             Apply();
+        }
+
+        /// <summary>
+        /// 앞당김 방향을 천천히 돌린다. 마우스를 휙 돌려도 카메라는 서서히 따라간다.
+        /// </summary>
+        private void UpdateLeadDirection()
+        {
+            Vector3 wanted;
+
+            if (leadWithMovement && motor != null && motor.PlanarVelocity.sqrMagnitude > 0.25f)
+            {
+                wanted = Flatten(motor.PlanarVelocity);
+            }
+            else if (leadWithMovement)
+            {
+                // 멈춰 있으면 방향을 유지한다. 제자리 회전으로는 카메라가 움직이지 않는다.
+                wanted = _leadDirection;
+            }
+            else
+            {
+                wanted = Flatten(target.forward);
+            }
+
+            if (wanted.sqrMagnitude < 0.0001f) return;
+
+            float t = 1f - Mathf.Exp(-lookAheadTurnLerp * Time.deltaTime);
+            _leadDirection = Vector3.Slerp(_leadDirection.sqrMagnitude < 0.0001f ? wanted : _leadDirection, wanted, t);
         }
 
         private void UpdateYaw()
@@ -132,11 +180,14 @@ namespace ByAWhisker.Cameras
 
         private Vector3 DesiredFocus()
         {
-            Vector3 facing = target.forward;
-            facing.y = 0f;
-            if (facing.sqrMagnitude > 0.0001f) facing.Normalize();
+            Vector3 lead = _leadDirection.sqrMagnitude > 0.0001f ? _leadDirection : Flatten(target.forward);
+            return target.position + Vector3.up * focusHeight + lead * lookAhead;
+        }
 
-            return target.position + Vector3.up * focusHeight + facing * lookAhead;
+        private static Vector3 Flatten(Vector3 v)
+        {
+            v.y = 0f;
+            return v.sqrMagnitude > 0.0001f ? v.normalized : Vector3.zero;
         }
 
         private void Apply()

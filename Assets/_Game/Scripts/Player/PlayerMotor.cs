@@ -26,6 +26,9 @@ namespace ByAWhisker.Player
         public float CurrentSpeed { get { return _planarVelocity.magnitude; } }
         public bool IsRunning { get; private set; }
 
+        /// <summary>수평 속도 벡터. 카메라가 이동 방향을 앞당길 때 쓴다.</summary>
+        public Vector3 PlanarVelocity { get { return _planarVelocity; } }
+
         /// <summary>눈 위치. M3의 시야 계산이 읽어 간다.</summary>
         public Vector3 EyePosition
         {

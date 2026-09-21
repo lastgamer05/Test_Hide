@@ -22,6 +22,7 @@ namespace ByAWhisker.Player
         [SerializeField] private bool turnToAim = true;
 
         private Camera _camera;
+        private ByAWhisker.UI.ControlsOverlay _overlay;
 
         /// <summary>지금 겨누고 있는 수평 방향. 화면 표시나 애니메이션이 읽어 갈 수 있다.</summary>
         public Vector3 AimDirection { get; private set; }
@@ -96,7 +97,13 @@ namespace ByAWhisker.Player
 
         private void OnTakedown()
         {
-            if (takedown != null) takedown.TryTakedown();
+            if (takedown == null) return;
+
+            bool done = takedown.TryTakedown();
+
+            // 실패도 알려 준다. 안 그러면 키가 먹은 건지 자리가 틀린 건지 알 수 없다.
+            if (_overlay == null) _overlay = FindAnyObjectByType<ByAWhisker.UI.ControlsOverlay>();
+            if (_overlay != null) _overlay.Flash(done ? "제압!" : "등 뒤로 더 가까이");
         }
     }
 }

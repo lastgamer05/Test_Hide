@@ -605,6 +605,8 @@ MonoBehaviour:
   bodyColor: {r: 0.72, g: 0.78, b: 0.84, a: 0.95}
   statusColor: {r: 0.95, g: 0.86, b: 0.62, a: 1}
   sortingOrder: 110
+  barLabelOrigin: {x: 36, y: 68}
+  barLabelSpacing: 278
 --- !u!1 &116784602
 GameObject:
   m_ObjectHideFlags: 0
@@ -7474,6 +7476,7 @@ GameObject:
   - component: {fileID: 1034100566}
   - component: {fileID: 1034100565}
   - component: {fileID: 1034100569}
+  - component: {fileID: 1034100570}
   m_Layer: 13
   m_Name: Guard_3
   m_TagString: Untagged
@@ -7654,7 +7657,8 @@ MonoBehaviour:
   isPlayer: 0
   corpseScent: 0.85
   disableWhenDown: []
-  keepEnabled: []
+  keepEnabled:
+  - {fileID: 1034100570}
   reviveOnRunReset: 1
 --- !u!114 &1034100566
 MonoBehaviour:
@@ -7737,6 +7741,23 @@ CapsuleCollider:
   m_Height: 1.8
   m_Direction: 1
   m_Center: {x: 0, y: 0.9, z: 0}
+--- !u!114 &1034100570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034100556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd60d3aaca758964bb1a96c1f3cdbdde, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.DownedBodyVisual
+  damageable: {fileID: 0}
+  fallSeconds: 0.4
+  sinkHeight: 0.55
+  deadTint: {r: 0.22, g: 0.2, b: 0.24, a: 1}
+  downedTint: {r: 0.34, g: 0.38, b: 0.48, a: 1}
 --- !u!1 &1039596464
 GameObject:
   m_ObjectHideFlags: 0
@@ -16236,6 +16257,7 @@ GameObject:
   - component: {fileID: 2041584600}
   - component: {fileID: 2041584599}
   - component: {fileID: 2041584603}
+  - component: {fileID: 2041584604}
   m_Layer: 13
   m_Name: Guard_2
   m_TagString: Untagged
@@ -16416,7 +16438,8 @@ MonoBehaviour:
   isPlayer: 0
   corpseScent: 0.85
   disableWhenDown: []
-  keepEnabled: []
+  keepEnabled:
+  - {fileID: 2041584604}
   reviveOnRunReset: 1
 --- !u!114 &2041584600
 MonoBehaviour:
@@ -16499,6 +16522,23 @@ CapsuleCollider:
   m_Height: 1.8
   m_Direction: 1
   m_Center: {x: 0, y: 0.9, z: 0}
+--- !u!114 &2041584604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041584590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd60d3aaca758964bb1a96c1f3cdbdde, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.DownedBodyVisual
+  damageable: {fileID: 0}
+  fallSeconds: 0.4
+  sinkHeight: 0.55
+  deadTint: {r: 0.22, g: 0.2, b: 0.24, a: 1}
+  downedTint: {r: 0.34, g: 0.38, b: 0.48, a: 1}
 --- !u!1 &2083004137
 GameObject:
   m_ObjectHideFlags: 0
@@ -16725,6 +16765,7 @@ GameObject:
   - component: {fileID: 2108297467}
   - component: {fileID: 2108297466}
   - component: {fileID: 2108297470}
+  - component: {fileID: 2108297471}
   m_Layer: 13
   m_Name: Guard_1
   m_TagString: Untagged
@@ -16905,7 +16946,8 @@ MonoBehaviour:
   isPlayer: 0
   corpseScent: 0.85
   disableWhenDown: []
-  keepEnabled: []
+  keepEnabled:
+  - {fileID: 2108297471}
   reviveOnRunReset: 1
 --- !u!114 &2108297467
 MonoBehaviour:
@@ -16988,6 +17030,23 @@ CapsuleCollider:
   m_Height: 1.8
   m_Direction: 1
   m_Center: {x: 0, y: 0.9, z: 0}
+--- !u!114 &2108297471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2108297457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd60d3aaca758964bb1a96c1f3cdbdde, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.DownedBodyVisual
+  damageable: {fileID: 0}
+  fallSeconds: 0.4
+  sinkHeight: 0.55
+  deadTint: {r: 0.22, g: 0.2, b: 0.24, a: 1}
+  downedTint: {r: 0.34, g: 0.38, b: 0.48, a: 1}
 --- !u!1 &2114994206
 GameObject:
   m_ObjectHideFlags: 0

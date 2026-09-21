@@ -58,6 +58,16 @@ namespace ByAWhisker.UI
         private Font _font;
         private bool _open;
 
+        private string _flashText;
+        private float _flashUntil;
+
+        /// <summary>제압처럼 한순간에 끝나는 일을 글자로 알린다. 안 그러면 뭐가 일어났는지 모른다.</summary>
+        public void Flash(string message, float seconds = 1.6f)
+        {
+            _flashText = message;
+            _flashUntil = Time.time + seconds;
+        }
+
         private void Awake()
         {
             if (stance == null) stance = FindAnyObjectByType<PlayerStance>();
@@ -215,10 +225,11 @@ namespace ByAWhisker.UI
         {
             string posture = stance != null && stance.IsCrouching ? "앉음" : "섬";
 
-            if (weapon == null) return posture;
+            string line = posture;
+            if (weapon != null) line += weapon.IsReloading ? "    재장전 중" : "    탄약 " + weapon.Ammo;
 
-            if (weapon.IsReloading) return posture + "    재장전 중";
-            return posture + "    탄약 " + weapon.Ammo;
+            if (Time.time < _flashUntil) line = _flashText + "\n" + line;
+            return line;
         }
 
         private void SetOpen(bool open)

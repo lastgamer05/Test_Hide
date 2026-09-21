@@ -5027,7 +5027,7 @@ MonoBehaviour:
   followLerp: 6
   lookAheadTurnLerp: 2
   deadZone: 0.35
-  leadWithMovement: 1
+  leadWithMovement: 0
   motor: {fileID: 0}
 --- !u!1 &735190184
 GameObject:

@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62f3400aceb1153429f863ded164a046, type: 3}
+  m_Name: WarehouseMap
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Level.LevelMapAsset
+  rows: '########################################
+
+    #................#.......HH............#
+
+    #.P..............#.......HH.....l......#
+
+    #..LL............#.....................#
+
+    #..LL....HH..L...##............L.......#
+
+    #........HH..L.......l.........L.......#
+
+    #................#....LLL......L.......#
+
+    #................#.............L.......#
+
+    #.........LL.....#..........HHH........#
+
+    #.........LL.....#..........HHH........#
+
+    ######.###########....L.........HH.....#
+
+    #................#....L.........HH.....#
+
+    #....HH..........#.....................#
+
+    #....HH..........#########.######.######
+
+    #..........................#...........#
+
+    #....LLL...................#..LL...l...#
+
+    #..........HHH.......L.....#..LL.......#
+
+    #..........HHH.......L.....#...........#
+
+    #...............l....L.....#.......HH..#
+
+    #....LL....................#..K....HH..#
+
+    #....LL........HH.....#....#.....L.....#
+
+    #..............HH.....#....#.....L.....#
+
+    #......l..............#....#...........#
+
+    #X....................#................#
+
+    ########################################'
+  cellSize: 2
+  wallHeight: 3.6
+  highCoverHeight: 3
+  lowCoverHeight: 1.15
+  floorMaterial: {fileID: 2100000, guid: 4ff2e63ab9ead804ca402db12ca66d4a, type: 2}
+  wallMaterial: {fileID: 2100000, guid: 78f3b7696166d504dbce00c38d520a75, type: 2}
+  highCoverMaterial: {fileID: 2100000, guid: 302e663a87c1e33498a390d3b4bbd310, type: 2}
+  lowCoverMaterial: {fileID: 2100000, guid: afdb6a8b88edc634aa16928dca618b2f, type: 2}

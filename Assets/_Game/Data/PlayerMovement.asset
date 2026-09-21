@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3b728c53d579fa4392614c9fc1e2cd7, type: 3}
+  m_Name: PlayerMovement
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Data.MovementSettings
+  walkSpeed: 3.6
+  runSpeed: 6.4
+  crouchSpeed: 2
+  acceleration: 18
+  turnSpeed: 14
+  standHeight: 1.8
+  crouchHeight: 1.15
+  standEyeHeight: 1.55
+  crouchEyeHeight: 1
+  stanceLerp: 10
+  crouchNoise: 1.6
+  walkNoise: 4.8
+  runNoise: 11

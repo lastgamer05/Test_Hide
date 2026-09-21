@@ -21,7 +21,13 @@ namespace ByAWhisker.Level
 
         public GridMap Grid { get; private set; }
         public Vector3 PlayerStartPosition { get; private set; }
+        public Vector3 KeyPosition { get; private set; }
+        public Vector3 ExitPosition { get; private set; }
+        public int LampCount { get; private set; }
         public LevelMapAsset Map { get { return map; } }
+
+        /// <summary>생성물이 들어간 부모. 부트스트랩이 여기서 체크포인트와 출구를 찾는다.</summary>
+        public Transform LevelRoot { get { return root != null ? root : transform; } }
 
         private void Awake()
         {
@@ -55,6 +61,129 @@ namespace ByAWhisker.Level
             PlayerStartPosition = Grid.TryFindFirst(CellType.PlayerStart, out start)
                 ? Grid.CellCenter(start.x, start.y)
                 : Grid.CellCenter(1, 1);
+
+            CreateMarkers(parent);
+        }
+
+        /// <summary>램프, 열쇠, 출구, 체크포인트를 놓는다.</summary>
+        private void CreateMarkers(Transform parent)
+        {
+            LampCount = 0;
+            KeyPosition = Vector3.zero;
+            ExitPosition = Vector3.zero;
+
+            foreach (Vector2Int cell in Grid.CellsOf(CellType.Lamp))
+            {
+                CreateLamp(parent, Grid.CellCenter(cell.x, cell.y));
+                LampCount++;
+            }
+
+            Vector2Int keyCell;
+            if (Grid.TryFindFirst(CellType.Key, out keyCell))
+            {
+                KeyPosition = Grid.CellCenter(keyCell.x, keyCell.y);
+                CreateKey(parent, KeyPosition);
+                CreateCheckpoint(parent, KeyPosition, "Checkpoint_Key");
+            }
+
+            Vector2Int exitCell;
+            if (Grid.TryFindFirst(CellType.Exit, out exitCell))
+            {
+                ExitPosition = Grid.CellCenter(exitCell.x, exitCell.y);
+                CreateExit(parent, ExitPosition);
+            }
+
+            CreateCheckpoint(parent, PlayerStartPosition, "Checkpoint_Start");
+        }
+
+        private void CreateLamp(Transform parent, Vector3 cellCenter)
+        {
+            var lamp = new GameObject("Lamp");
+            lamp.transform.SetParent(parent, false);
+            lamp.transform.localPosition = cellCenter + Vector3.up * map.lampHeight;
+
+            Light light = lamp.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.range = map.lampRange;
+            light.color = map.lampColor;
+            light.intensity = 1.6f;
+            light.shadows = LightShadows.Soft;
+
+            var source = lamp.AddComponent<Perception.LightSource>();
+            source.radius = map.lampLitRadius;
+            source.intensity = map.lampIntensity;
+
+            GameObject bulb = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            bulb.name = "Bulb";
+            DestroyCollider(bulb);
+            bulb.transform.SetParent(lamp.transform, false);
+            bulb.transform.localScale = Vector3.one * 0.32f;
+            if (map.lampMaterial != null) bulb.GetComponent<MeshRenderer>().sharedMaterial = map.lampMaterial;
+        }
+
+        private void CreateKey(Transform parent, Vector3 cellCenter)
+        {
+            var key = new GameObject("Key");
+            key.transform.SetParent(parent, false);
+            key.transform.localPosition = cellCenter + Vector3.up * 0.9f;
+
+            SphereCollider trigger = key.AddComponent<SphereCollider>();
+            trigger.isTrigger = true;
+            trigger.radius = 0.7f;
+
+            GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            visual.name = "Visual";
+            DestroyCollider(visual);
+            visual.transform.SetParent(key.transform, false);
+            visual.transform.localScale = new Vector3(0.45f, 0.45f, 0.18f);
+            if (map.keyMaterial != null) visual.GetComponent<MeshRenderer>().sharedMaterial = map.keyMaterial;
+
+            ObjectiveItem item = key.AddComponent<ObjectiveItem>();
+            item.SetVisual(visual);
+        }
+
+        private void CreateExit(Transform parent, Vector3 cellCenter)
+        {
+            var exit = new GameObject("Exit");
+            exit.transform.SetParent(parent, false);
+            exit.transform.localPosition = cellCenter;
+
+            BoxCollider trigger = exit.AddComponent<BoxCollider>();
+            trigger.isTrigger = true;
+            trigger.size = new Vector3(Grid.CellSize, 3f, Grid.CellSize);
+            trigger.center = new Vector3(0f, 1.5f, 0f);
+
+            GameObject pad = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            pad.name = "Pad";
+            DestroyCollider(pad);
+            pad.transform.SetParent(exit.transform, false);
+            pad.transform.localPosition = new Vector3(0f, 0.03f, 0f);
+            pad.transform.localScale = new Vector3(Grid.CellSize * 0.9f, 0.06f, Grid.CellSize * 0.9f);
+            if (map.exitMaterial != null) pad.GetComponent<MeshRenderer>().sharedMaterial = map.exitMaterial;
+
+            exit.AddComponent<ExitZone>();
+        }
+
+        private void CreateCheckpoint(Transform parent, Vector3 cellCenter, string name)
+        {
+            var point = new GameObject(name);
+            point.transform.SetParent(parent, false);
+            point.transform.localPosition = cellCenter;
+
+            SphereCollider trigger = point.AddComponent<SphereCollider>();
+            trigger.isTrigger = true;
+            trigger.radius = 1.2f;
+
+            point.AddComponent<Checkpoint>();
+        }
+
+        private static void DestroyCollider(GameObject target)
+        {
+            Collider collider = target.GetComponent<Collider>();
+            if (collider == null) return;
+
+            if (Application.isPlaying) Destroy(collider);
+            else DestroyImmediate(collider);
         }
 
         [ContextMenu("Clear Level")]

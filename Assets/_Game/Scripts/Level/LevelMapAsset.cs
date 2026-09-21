@@ -23,6 +23,17 @@ namespace ByAWhisker.Level
         public Material wallMaterial;
         public Material highCoverMaterial;
         public Material lowCoverMaterial;
+        public Material lampMaterial;
+        public Material keyMaterial;
+        public Material exitMaterial;
+
+        [Header("램프")]
+        public float lampHeight = 3f;
+        public float lampRange = 7f;
+        [Tooltip("탐지에 쓰는 밝기 반경. 보이는 빛보다 조금 좁게 둔다.")]
+        public float lampLitRadius = 5.5f;
+        public float lampIntensity = 1f;
+        public Color lampColor = new Color(1f, 0.76f, 0.48f);
 
         /// <summary>지도 문자 하나를 칸 종류로 바꾼다.</summary>
         public static CellType Parse(char symbol)

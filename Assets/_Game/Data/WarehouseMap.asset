@@ -69,3 +69,11 @@ MonoBehaviour:
   wallMaterial: {fileID: 2100000, guid: 78f3b7696166d504dbce00c38d520a75, type: 2}
   highCoverMaterial: {fileID: 2100000, guid: 302e663a87c1e33498a390d3b4bbd310, type: 2}
   lowCoverMaterial: {fileID: 2100000, guid: afdb6a8b88edc634aa16928dca618b2f, type: 2}
+  lampMaterial: {fileID: 2100000, guid: abc852ef6204ec84680cbce7e38838a7, type: 2}
+  keyMaterial: {fileID: 2100000, guid: 00eb08d4328867e49903193953d79044, type: 2}
+  exitMaterial: {fileID: 2100000, guid: f8009510bedb8db4686e46a868fe85cb, type: 2}
+  lampHeight: 3
+  lampRange: 7
+  lampLitRadius: 5.5
+  lampIntensity: 1
+  lampColor: {r: 1, g: 0.76, b: 0.48, a: 1}

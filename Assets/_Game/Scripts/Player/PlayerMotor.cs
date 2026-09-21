@@ -15,6 +15,8 @@ namespace ByAWhisker.Player
         [SerializeField] private PlayerStance stance;
         [Tooltip("이동 방향의 기준이 되는 카메라. 비우면 메인 카메라를 쓴다.")]
         [SerializeField] private Camera viewCamera;
+        [Tooltip("켜면 이동 방향을 바라본다. 끄면 마우스 쪽을 바라본다. 켜면 제자리 둘러보기와 엄폐 엿보기가 불가능해진다.")]
+        [SerializeField] private bool faceMovementDirection;
 
         private CharacterController _controller;
         private Vector3 _planarVelocity;
@@ -91,6 +93,12 @@ namespace ByAWhisker.Player
 
         private void FaceCursor()
         {
+            if (faceMovementDirection)
+            {
+                FaceMovement();
+                return;
+            }
+
             if (viewCamera == null) return;
 
             Ray ray = viewCamera.ScreenPointToRay(input.PointerPosition);
@@ -101,6 +109,17 @@ namespace ByAWhisker.Player
 
             Vector3 target = ray.GetPoint(distance);
             Vector3 direction = Flatten(target - transform.position);
+            if (direction.sqrMagnitude < 0.01f) return;
+
+            Quaternion wanted = Quaternion.LookRotation(direction);
+            float t = 1f - Mathf.Exp(-settings.turnSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, wanted, t);
+        }
+
+        /// <summary>이동 방향을 바라본다. 멈추면 마지막 방향을 유지한다.</summary>
+        private void FaceMovement()
+        {
+            Vector3 direction = Flatten(_planarVelocity);
             if (direction.sqrMagnitude < 0.01f) return;
 
             Quaternion wanted = Quaternion.LookRotation(direction);

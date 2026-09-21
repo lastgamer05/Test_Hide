@@ -5022,9 +5022,9 @@ MonoBehaviour:
   startYaw: 45
   stepDegrees: 90
   rotateSeconds: 0.25
-  lookAhead: 2
+  lookAhead: 0
   focusHeight: 1
-  followLerp: 5
+  followLerp: 6
   lookAheadTurnLerp: 2.5
   deadZone: 0.35
   leadWithMovement: 1

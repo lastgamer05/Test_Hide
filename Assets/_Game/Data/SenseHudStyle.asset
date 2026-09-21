@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 61
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45c9ae0faf3a9334b897cd2b16cef478, type: 3}
+  m_Name: SenseHudStyle
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.SenseHudStyle
+  referenceResolution: {x: 1920, y: 1080}
+  barMargin: {x: 36, y: 44}
+  barSize: {x: 260, y: 18}
+  barSpacing: 18
+  barsVertical: 0
+  barFollowSpeed: 11
+  barBackColor: {r: 0.05, g: 0.06, b: 0.08, a: 0.85}
+  noiseColor: {r: 0.45, g: 0.86, b: 0.95, a: 1}
+  lightColor: {r: 1, g: 0.87, b: 0.45, a: 1}
+  barEpsilon: 0.004
+  maxArcs: 6
+  arcRadius: 210
+  arcThickness: 10
+  arcLengthQuiet: 60
+  arcLengthLoud: 150
+  arcFadeSeconds: 2.4
+  arcQuietColor: {r: 0.55, g: 0.78, b: 0.85, a: 1}
+  arcLoudColor: {r: 0.9, g: 0.49, b: 0.36, a: 1}
+  arcMaxAlpha: 0.95
+  arcMergeDegrees: 22
+  maxScentDots: 16
+  scentSampleRadius: 6
+  scentRings: 2
+  scentSamplesPerRing: 8
+  scentMinStrength: 0.06
+  scentRadiusNear: 40
+  scentRadiusFar: 160
+  scentDotSizeMin: 34
+  scentDotSizeMax: 64
+  scentMaxAlpha: 0.6
+  scentGradientLean: 22
+  scentAgeHalfLife: 12
+  scentOwnerColors:
+  - {r: 0.58, g: 0.8, b: 0.62, a: 1}
+  - {r: 0.8, g: 0.63, b: 0.78, a: 1}
+  - {r: 0.84, g: 0.74, b: 0.52, a: 1}
+  - {r: 0.55, g: 0.72, b: 0.88, a: 1}
+  - {r: 0.86, g: 0.56, b: 0.5, a: 1}

@@ -1,5 +1,6 @@
 using UnityEngine;
 using ByAWhisker.Core;
+using ByAWhisker.Visibility;
 
 namespace ByAWhisker.Combat
 {
@@ -25,6 +26,9 @@ namespace ByAWhisker.Combat
         private Renderer[] _renderers;
         private MaterialPropertyBlock _block;
 
+        // 쓰러진 몸은 시야 밖에서도 남아야 해서 이걸 끈다. 되살릴 때 다시 켠다.
+        private EnemyVisibility _visibility;
+
         private Vector3 _standPosition;
         private Quaternion _standRotation;
 
@@ -38,6 +42,7 @@ namespace ByAWhisker.Combat
         private void Awake()
         {
             if (damageable == null) damageable = GetComponent<Damageable>();
+            _visibility = GetComponent<EnemyVisibility>();
             _renderers = GetComponentsInChildren<Renderer>(true);
             _block = new MaterialPropertyBlock();
         }
@@ -82,6 +87,7 @@ namespace ByAWhisker.Combat
             _fell = true;
 
             Tint(info.lethal ? deadTint : downedTint);
+            Linger(true);
         }
 
         private void Update()
@@ -108,7 +114,21 @@ namespace ByAWhisker.Combat
             // Damageable.Revive가 컴포넌트를 되살리지만 자세와 색은 우리 몫이다.
             transform.SetPositionAndRotation(_standPosition, _standRotation);
             Tint(null);
+            Linger(false);
             _fell = false;
+        }
+
+        /// <summary>
+        /// 쓰러진 몸은 시야를 벗어나도 화면에 남긴다. 시체는 단서라서, 지나가다 본 자리에
+        /// 그대로 있어야 한다. 한 번도 못 본 자리는 합성 패스가 어차피 검게 칠한다.
+        /// </summary>
+        private void Linger(bool down)
+        {
+            if (_visibility != null) _visibility.enabled = !down;
+            if (!down) return;
+
+            for (int i = 0; i < _renderers.Length; i++)
+                if (_renderers[i] != null) _renderers[i].enabled = true;
         }
 
         /// <summary>색을 덮어쓴다. null이면 원래 머티리얼 색으로 돌아간다.</summary>

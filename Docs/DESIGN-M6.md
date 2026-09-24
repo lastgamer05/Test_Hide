@@ -6,7 +6,8 @@
 
 - `Assets/_Game/Models/Wolf/WolfRig.fbx` — 믹사모가 리깅한 몸. Humanoid, 뼈 46개.
 - `WolfTPose.glb` — 원본 모델. 이제는 텍스처(`image_0`)를 꺼내 쓰는 용도로만 남아 있다.
-- `Wolf_Idle / Wolf_Walk / Wolf_Run / Wolf_CrouchWalk / Wolf_PistolShot / Wolf_HitFall .fbx` — 동작 여섯.
+- `Wolf_Idle / Wolf_Walk / Wolf_Run / Wolf_CrouchIdle / Wolf_CrouchWalk / Wolf_PistolShot /
+  Wolf_HitFall .fbx` — 동작 일곱.
 - `Assets/_Game/Data/WolfAnimatorMixamo.controller` — 상태 기계.
 - `Assets/_Game/Data/WolfUpperBody.mask` — 상체만 남기는 마스크.
 - `Assets/_Game/Materials/WolfBody.mat` — URP Lit, 베이스맵은 `image_0`.
@@ -16,8 +17,10 @@
 
 ## 레이어
 
-- Base Layer — `Move` 블렌드 트리(Idle 0 / Walk 2.2 / Run 5), `CrouchWalk`, `HitFall`.
-  `HitFall`은 AnyState에서 `Down`으로 들어간다.
+- Base Layer — `Move` 블렌드 트리(Idle 0 / Walk 3.6 / Run 6.4), `CrouchWalk`(= `CrouchMove`
+  블렌드 트리, CrouchIdle 0 / CrouchWalk 2), `HitFall`. `HitFall`은 AnyState에서 `Down`으로 들어간다.
+  문턱값은 `PlayerMovement.asset`의 속도와 같은 m/s다. `Speed`에 `PlayerMotor.CurrentSpeed`가
+  그대로 들어오므로 0~1 같은 정규화 값을 쓰면 움직이는 순간 늘 달리기가 된다.
 - UpperBody — 마스크를 쓰고 `NoShot`(빈 상태)과 `PistolShot` 둘. `Fire`로 들어가고 끝나면 돌아온다.
   자기 자신으로 가는 전이가 있어서 연사할 때 동작이 처음부터 다시 나온다.
   사격을 따로 떼어 놓은 이유는 걸으면서도 쏴야 하기 때문이다.
@@ -43,6 +46,9 @@
 클립이면 반드시 꺼야 한다. 끈 뒤 몸통이 기준점에서 벗어나는 폭은 4cm 이하로 줄었다.
 
 세로(`lockRootHeightY`)는 반대로 켜 둔다. 꺼서 루트로 빼면 발이 바닥에서 뜬다.
+
+`BlendTree.children`을 넣기 전에 `useAutomaticThresholds`를 먼저 꺼야 한다. 켠 채로 넣으면 유니티가
+문턱값을 0~1로 고르게 다시 나눠 버린다. 3.6과 6.4를 넣었는데 0.5와 1이 되어 있던 이유다.
 
 `heightOffset`은 값이 커질수록 몸이 **내려간다**. 올리려고 0.38을 줬다가 더 깊이 박혔다. 지금은 -0.11이다.
 

@@ -1,5 +1,6 @@
 using UnityEngine;
 using ByAWhisker.Combat;
+using ByAWhisker.Core;
 
 namespace ByAWhisker.Player
 {
@@ -23,6 +24,7 @@ namespace ByAWhisker.Player
         private static readonly int CrouchId = Animator.StringToHash("Crouch");
         private static readonly int FireId = Animator.StringToHash("Fire");
         private static readonly int DownId = Animator.StringToHash("Down");
+        private static readonly int MoveStateId = Animator.StringToHash("Move");
 
         private float _speed;
 
@@ -39,12 +41,14 @@ namespace ByAWhisker.Player
         {
             if (weapon != null) weapon.Fired += OnFired;
             if (damageable != null) damageable.Damaged += OnDamaged;
+            GameEvents.RunReset += OnRunReset;
         }
 
         private void OnDisable()
         {
             if (weapon != null) weapon.Fired -= OnFired;
             if (damageable != null) damageable.Damaged -= OnDamaged;
+            GameEvents.RunReset -= OnRunReset;
         }
 
         private void Update()
@@ -67,6 +71,22 @@ namespace ByAWhisker.Player
         private void OnDamaged(DamageInfo info)
         {
             animator.SetTrigger(DownId);
+        }
+
+        /// <summary>
+        /// 쓰러지는 동작은 끝나도 그 자리에 머문다. 다시 시작할 때 일으켜 세우지 않으면
+        /// 누운 채로 돌아다닌다. 아직 소비되지 않은 트리거도 같이 지운다.
+        /// </summary>
+        private void OnRunReset()
+        {
+            if (animator == null) return;
+
+            animator.ResetTrigger(DownId);
+            animator.ResetTrigger(FireId);
+            _speed = 0f;
+            animator.SetFloat(SpeedId, 0f);
+            animator.Play(MoveStateId, 0, 0f);
+            animator.Update(0f);
         }
     }
 }

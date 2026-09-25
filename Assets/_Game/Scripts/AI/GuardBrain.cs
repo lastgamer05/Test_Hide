@@ -1,5 +1,7 @@
 using UnityEngine;
+using ByAWhisker.Combat;
 using ByAWhisker.Core;
+using ByAWhisker.Senses;
 
 namespace ByAWhisker.AI
 {
@@ -10,7 +12,8 @@ namespace ByAWhisker.AI
     [RequireComponent(typeof(GuardMotor))]
     public class GuardBrain : MonoBehaviour
     {
-        public enum State { Patrol, Suspicious, Search, Alert, Attack, Stunned }
+        // TakeCover를 끝에 붙인 이유는, 중간에 끼우면 씬에 저장된 다른 상태 값이 한 칸씩 밀리기 때문이다.
+        public enum State { Patrol, Suspicious, Search, Alert, Attack, Stunned, TakeCover }
 
         [Header("참조")]
         [SerializeField] private GuardMotor motor;
@@ -18,6 +21,8 @@ namespace ByAWhisker.AI
         [SerializeField] private PatrolRoute route;
         [Tooltip("사격 담당. 비어 있으면 예전처럼 붙어서 잡는 것만 한다.")]
         [SerializeField] private GuardGunner gunner;
+        [Tooltip("엄폐 담당. 비어 있으면 총을 맞아도 예전처럼 벌판에서 쫓는다.")]
+        [SerializeField] private GuardCover cover;
 
         [Header("속도")]
         [SerializeField] private float patrolSpeed = 1.6f;
@@ -41,6 +46,14 @@ namespace ByAWhisker.AI
         [SerializeField] private float attackWindup = 0.75f;
         [SerializeField] private float lookAroundInterval = 1.2f;
 
+        [Header("엄폐")]
+        [Tooltip("엄폐 자리까지 가는 데 이보다 오래 걸리면 포기하고 다시 쫓는다.")]
+        [SerializeField] private float coverTravelTimeout = 4f;
+        [Tooltip("한 번 숨은 뒤 다시 숨기까지의 최소 간격. 없으면 총알마다 엄폐물 사이를 왕복한다.")]
+        [SerializeField] private float coverCooldown = 6f;
+        [Tooltip("총성이 들리는 거리 배율. 총성은 발소리와 달리 프로필의 약한 귀를 거치지 않고 그대로 듣는다.")]
+        [SerializeField] private float gunshotHearScale = 1f;
+
         private Vector3 _spawnPosition;
         private Quaternion _spawnRotation;
 
@@ -52,6 +65,10 @@ namespace ByAWhisker.AI
         private int _patrolIndex;
         private bool _searchArrived;
         private Vector3 _lookTarget;
+
+        private Damageable _body;
+        private bool _underFire;      // 이번에 총격을 받았다. 한 프레임짜리 신호라 Update가 소비한다
+        private float _coverReadyTime; // 이 시각이 지나야 다시 숨는다
 
         public State Current { get; private set; }
         public event System.Action<State> StateChanged;
@@ -65,6 +82,10 @@ namespace ByAWhisker.AI
             if (motor == null) motor = GetComponent<GuardMotor>();
             if (perception == null) perception = GetComponent<GuardPerception>();
             if (gunner == null) gunner = GetComponent<GuardGunner>();
+            if (cover == null) cover = GetComponent<GuardCover>();
+
+            // 콜라이더가 자식에 달려 있어도 맞은 몸은 부모 하나다.
+            _body = GetComponentInParent<Damageable>();
 
             Current = State.Patrol;
         }
@@ -72,11 +93,19 @@ namespace ByAWhisker.AI
         private void OnEnable()
         {
             GameEvents.RunReset += HandleRunReset;
+
+            // 총격을 두 갈래로 잡는다. 맞은 것과 들은 것이다. 빗나간 총알은 Damaged가 오지 않고,
+            // 소음기를 단 총은 소리가 작아 못 들을 수 있어서 둘 중 하나로는 모자란다.
+            NoiseBus.Emitted += HandleNoise;
+            if (_body != null) _body.Damaged += HandleDamaged;
         }
 
         private void OnDisable()
         {
             GameEvents.RunReset -= HandleRunReset;
+
+            NoiseBus.Emitted -= HandleNoise;
+            if (_body != null) _body.Damaged -= HandleDamaged;
         }
 
         /// <summary>뒤에서 기절당했을 때. 그동안 이동도 판정도 멈춘다.</summary>
@@ -94,12 +123,17 @@ namespace ByAWhisker.AI
 
             if (Current == State.Stunned)
             {
+                // 기절 중에 받은 총격은 깨어난 뒤에 쓸 신호가 아니다. 여기서 버린다.
+                _underFire = false;
                 _stunRemaining -= dt;
                 if (_stunRemaining <= 0f) Enter(State.Patrol);
                 return;
             }
 
             if (perception != null) EvaluateEscalation();
+
+            // 의심도로 상태를 올린 다음에 본다. 방금 Alert가 된 경비도 같은 프레임에 숨을 수 있게.
+            TryTakeCover();
 
             _stateTimer += dt;
 
@@ -110,7 +144,29 @@ namespace ByAWhisker.AI
                 case State.Search: TickSearch(dt); break;
                 case State.Alert: TickAlert(dt); break;
                 case State.Attack: TickAttack(); break;
+                case State.TakeCover: TickTakeCover(); break;
             }
+        }
+
+        /// <summary>
+        /// 총격을 받았을 때 숨을지 고른다. 신호는 한 프레임짜리라 숨든 안 숨든 여기서 지운다.
+        /// 이미 Alert나 Attack일 때만 본다. 아직 아무것도 모르는 경비가 총소리 하나에
+        /// 엄폐부터 하면 "어디서 났는지 찾는" 단계가 통째로 사라진다.
+        /// </summary>
+        private void TryTakeCover()
+        {
+            bool signal = _underFire;
+            _underFire = false;
+
+            if (!signal) return;
+            if (cover == null || motor == null || perception == null) return;
+            if (Current != State.Alert && Current != State.Attack) return;
+            if (Time.time < _coverReadyTime) return;
+
+            // 위협은 마지막으로 안 자리다. Alert까지 왔으면 이 자리가 곧 플레이어다.
+            if (!cover.FindCover(perception.LastKnownPosition)) return;
+
+            Enter(State.TakeCover);
         }
 
         /// <summary>의심도와 소리로 상태를 올린다. 내리는 쪽은 각 상태가 알아서 한다.</summary>
@@ -120,8 +176,12 @@ namespace ByAWhisker.AI
 
             if (aware >= alertThreshold)
             {
-                // Attack은 Alert의 하위 행동이라 여기서 끌어내리지 않는다.
-                if (Current != State.Alert && Current != State.Attack) Enter(State.Alert);
+                // Attack과 TakeCover는 Alert의 하위 행동이라 여기서 끌어내리지 않는다.
+                // 숨는 도중에 다시 Alert로 갈아타면 엄폐물 앞에서 한 발짝도 못 움직인다.
+                if (Current != State.Alert && Current != State.Attack && Current != State.TakeCover)
+                {
+                    Enter(State.Alert);
+                }
                 return;
             }
 
@@ -142,7 +202,7 @@ namespace ByAWhisker.AI
 
             // 쓰러진 몸은 소리와 같은 무게의 단서다. 살아 있는 단서를 쫓는 중이면 그쪽이 먼저라
             // 이 자리에서만 본다. Alert나 Attack을 Search로 끌어내리지도 않는다.
-            if (perception.SeesBody && Current != State.Alert && Current != State.Attack)
+            if (perception.SeesBody && Current != State.Alert && Current != State.Attack && Current != State.TakeCover)
             {
                 // 받아들이는 순간 뒤질 자리가 시체 자리로 바뀐다. 같은 몸에 두 번 놀라지는 않는다.
                 perception.AcknowledgeBody();
@@ -258,8 +318,18 @@ namespace ByAWhisker.AI
                 return;
             }
 
-            // 겨누는 동안은 걷지 않는다. 걸으면서 쏘면 플레이어가 피할 틈이 없다.
-            if (gunner != null && gunner.IsAiming)
+            // 엄폐물에 붙어 있고 거기서 보이면 나가지 않는다. 애써 숨고는 곧장 걸어 나오면
+            // 엄폐가 그저 도는 길이 된다. 안 보이면 더 지킬 것이 없으니 예전처럼 쫓는다.
+            if (gunner != null && cover != null && cover.InCover && perception.CanSeePlayer)
+            {
+                motor.Stop();
+                motor.FaceTowards(perception.LastKnownPosition, turnSpeed);
+                return;
+            }
+
+            // 겨누는 동안과 쏘는 동안은 걷지 않는다. 걸으면서 쏘면 플레이어가 피할 틈이 없다.
+            // 연사 구간에서는 IsAiming이 내려가므로 IsFiring도 같이 봐야 한다.
+            if (gunner != null && (gunner.IsAiming || gunner.IsFiring))
             {
                 motor.Stop();
                 motor.FaceTowards(perception.LastKnownPosition, turnSpeed);
@@ -267,6 +337,36 @@ namespace ByAWhisker.AI
             }
 
             motor.MoveTo(perception.LastKnownPosition, chaseSpeed);
+        }
+
+        /// <summary>
+        /// 찾아 둔 자리로 달린다. 여기서는 쫓지 않는다. 총은 GuardGunner가 달리는 중에도 굴리고 있다.
+        /// </summary>
+        private void TickTakeCover()
+        {
+            if (motor == null || cover == null || !cover.HasCover)
+            {
+                Enter(State.Alert);
+                return;
+            }
+
+            // 목적지를 먼저 준다. 경로가 없는 상태에서 ReachedDestination을 물으면
+            // 아직 한 발짝도 안 뗐는데 도착했다고 답한다. TickSearch가 도는 순서와 같다.
+            motor.MoveTo(cover.CoverPosition, chaseSpeed);
+
+            if (motor.ReachedDestination)
+            {
+                motor.Stop();
+                // 도착한 프레임에 먼저 위협 쪽으로 돌려 둔다. Alert로 돌아가 겨누기 시작할 때
+                // 이미 그쪽을 보고 있어야 등을 보인 채 총을 드는 모양이 안 나온다.
+                if (perception != null) motor.FaceTowards(perception.LastKnownPosition, turnSpeed);
+                Enter(State.Alert);
+            }
+            else if (_stateTimer >= coverTravelTimeout)
+            {
+                // 길이 막혀 빙 돌아가는 중일 수 있다. 그 사이 벌판에 서 있는 셈이라 오래 끌지 않는다.
+                Enter(State.Alert);
+            }
         }
 
         private void TickAttack()
@@ -307,12 +407,56 @@ namespace ByAWhisker.AI
 
             _patrolIndex = 0;
             _stunRemaining = 0f;
+
+            // 지난 판에서 찾아 둔 자리와 쉬는 시간은 여기서 버린다. 경비는 제자리로 돌아가 있어서
+            // 옛 자리는 엉뚱한 방향이고, 남은 쉬는 시간은 첫 총격을 그냥 흘려보낸다.
+            if (cover != null) cover.Forget();
+            _underFire = false;
+            _coverReadyTime = 0f;
+
             Enter(State.Patrol, true);
+        }
+
+        /// <summary>
+        /// 맞았다. 총알만 센다. 제압이나 낙하는 숨어서 될 일이 아니다.
+        /// 이 게임은 한 대에 죽어서 이 신호가 오는 일이 드물지만, 빗나간 총알에는
+        /// 이쪽이 오지 않으므로 아래 소리 쪽과 둘이 짝을 이룬다.
+        /// </summary>
+        private void HandleDamaged(DamageInfo info)
+        {
+            if (info.kind != DamageKind.Bullet) return;
+            _underFire = true;
+        }
+
+        /// <summary>
+        /// 총성을 듣는다. GuardPerception의 청각은 종류를 가리지 않고 의심도만 올려서,
+        /// "총소리인가"를 여기서 따로 본다. 남의 파일을 고치지 않고도 NoiseBus가 종류를 들고 오기 때문이다.
+        /// 발소리와 달리 프로필의 약한 귀(hearingMultiplier)를 거치지 않는다. 총성은 그만큼 크다.
+        /// </summary>
+        private void HandleNoise(NoiseEvent evt)
+        {
+            if (evt.kind != NoiseKind.Gunshot) return;
+            if (IsOwnNoise(evt.source)) return;
+            if (HorizontalDistance(transform.position, evt.position) > evt.radius * gunshotHearScale) return;
+
+            _underFire = true;
+        }
+
+        /// <summary>자기 총소리에 놀라 자기 엄폐물로 뛰지 않도록. 총을 든 자식 오브젝트까지 함께 본다.</summary>
+        private bool IsOwnNoise(GameObject source)
+        {
+            if (source == null) return false;
+            if (source == gameObject) return true;
+            return source.transform.IsChildOf(transform);
         }
 
         private void Enter(State next, bool force = false)
         {
             if (!force && Current == next) return;
+
+            // 엄폐를 마치는 순간부터 쉬는 시간을 센다. 들어갈 때부터 세면 달려가는 시간만큼
+            // 간격이 짧아져서, 도착하자마자 옆 엄폐물로 다시 뛰는 일이 생긴다.
+            if (Current == State.TakeCover) _coverReadyTime = Time.time + coverCooldown;
 
             // 기절에서 깨어나면 감각을 다시 켠다.
             if (Current == State.Stunned && next != State.Stunned && perception != null)
@@ -348,9 +492,11 @@ namespace ByAWhisker.AI
             }
 
             // 총은 쫓는 동안에만 든다. 순찰로 돌아가면 내린다.
+            // 숨으러 달리는 동안에도 든 채로 둔다. 엄폐물에 닿고 나서야 총을 드는 경비는
+            // 이동 중에 쏠 기회를 통째로 버리는 셈이고, 여기서 내리면 겨누던 진행도도 날아간다.
             if (gunner != null)
             {
-                if (next == State.Alert) gunner.Engage();
+                if (next == State.Alert || next == State.TakeCover) gunner.Engage();
                 else gunner.Disengage();
             }
 

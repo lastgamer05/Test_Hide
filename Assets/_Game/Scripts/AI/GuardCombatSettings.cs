@@ -21,6 +21,13 @@ namespace ByAWhisker.AI
         [Tooltip("쏘고 나서 다음 조준까지. 0이면 연사가 되어 피할 틈이 사라진다.")]
         public float recoverSeconds = 1f;
 
+        [Header("연사")]
+        [Tooltip("한 번 겨눈 뒤 쏘는 발 수. 겨누는 시간은 그대로 두고 이 값만 올리면, 예고는 남긴 채 한 번 걸렸을 때의 대가만 무거워진다.")]
+        public int burstCount = 3;
+
+        [Tooltip("연사 중 발 사이 간격(초). 총 자체의 fireInterval보다 짧게 잡아도 그쪽이 우선이라 더 빨라지지는 않는다.")]
+        public float burstInterval = 0.18f;
+
         [Tooltip("대상을 놓치고도 이만큼은 겨눈 채로 버틴다. 기둥 뒤로 잠깐 숨은 것과 완전히 따돌린 것을 가른다.")]
         public float loseAimSeconds = 0.8f;
     }

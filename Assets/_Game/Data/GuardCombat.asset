@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09f819e9d017bd040bc8bcd302119c4f, type: 3}
   m_Name: GuardCombat
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.GuardCombatSettings
-  fireRange: 12
-  aimSeconds: 1.2
-  recoverSeconds: 1
+  fireRange: 17
+  aimSeconds: 0.7
+  recoverSeconds: 0.7
   loseAimSeconds: 0.8

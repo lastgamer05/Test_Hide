@@ -17,6 +17,6 @@ MonoBehaviour:
   rangeLit: 16
   hearingMultiplier: 0.6
   canSmell: 0
-  detectSeconds: 1
+  detectSeconds: 0.45
   forgetPerSecond: 0.25
   eyeHeight: 1.6

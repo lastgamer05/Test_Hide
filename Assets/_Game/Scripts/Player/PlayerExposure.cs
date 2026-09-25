@@ -28,6 +28,13 @@ namespace ByAWhisker.Player
         [Tooltip("밝기가 목표값을 따라가는 속도. 클수록 빨리 붙는다.")]
         [SerializeField] private float lightFollowSpeed = 6f;
 
+        [Header("총구 섬광")]
+        [Tooltip("총을 쏜 순간 몸이 얼마나 환해지는가. 0..1. 어둠이 총을 공짜로 만들지 않게 하는 값이다.")]
+        [Range(0f, 1f)]
+        [SerializeField] private float muzzleFlashLight = 1f;
+        [Tooltip("섬광이 사그라드는 시간(초). 이 사이에 경비 눈에 들면 들킨다.")]
+        [SerializeField] private float muzzleFlashSeconds = 0.6f;
+
         [Header("냄새")]
         [Tooltip("내 냄새를 남기는 쪽. 비우면 같은 오브젝트에서 찾는다.")]
         [SerializeField] private ByAWhisker.Senses.ScentSource scentSource;
@@ -39,6 +46,9 @@ namespace ByAWhisker.Player
 
         /// <summary>0..1. 램프 아래로 걸어 들어갈 때 값이 튀지 않게 부드럽게 따라간다.</summary>
         public float Light { get; private set; }
+
+        // 총구 섬광이 남긴 밝기. 램프가 만드는 밝기와 따로 두고, 읽을 때 둘 중 큰 값을 준다.
+        private float _flashLeft;
 
         /// <summary>
         /// 지금 내는 소리. 0..1이다. 경비는 이 값이 아니라 NoiseBus의 사건을 듣고,
@@ -104,7 +114,25 @@ namespace ByAWhisker.Player
             float t = 1f - Mathf.Exp(-lightFollowSpeed * Time.deltaTime);
             Light = Mathf.Lerp(Light, target, t);
 
+            // 섬광은 보간하지 않는다. 터지는 순간 바로 환해져야 "쏜 자리가 드러난다"가 된다.
+            if (_flashLeft > 0f)
+            {
+                _flashLeft -= Time.deltaTime;
+                float fade = Mathf.Clamp01(_flashLeft / Mathf.Max(0.01f, muzzleFlashSeconds));
+                Light = Mathf.Max(Light, muzzleFlashLight * fade);
+            }
+
             UpdateScent();
+        }
+
+        /// <summary>
+        /// 총을 쏜 순간 몸이 드러난다. 어둠 속 탐지 거리가 5m뿐이라 소음기 권총이
+        /// 사거리 안에서 공짜가 되어 버렸다. 섬광이 그 공짜를 없앤다.
+        /// </summary>
+        public void FlashFromMuzzle()
+        {
+            _flashLeft = muzzleFlashSeconds;
+            Light = Mathf.Max(Light, muzzleFlashLight);
         }
 
         /// <summary>앉으면 몸을 낮춰 냄새도 덜 퍼뜨린다. 남은 냄새는 격자에서 읽어 온다.</summary>

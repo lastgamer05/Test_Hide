@@ -15,6 +15,8 @@ namespace ByAWhisker.Player
         [SerializeField] private Weapon weapon;
         [SerializeField] private TakedownAction takedown;
         [SerializeField] private BodyCarry carry;
+        [Tooltip("총구 섬광으로 몸이 드러나는 쪽. 비우면 같은 오브젝트에서 찾는다.")]
+        [SerializeField] private PlayerExposure exposure;
         [Tooltip("총구 높이. 눈보다 조금 아래다.")]
         [SerializeField] private float muzzleHeight = 1.2f;
         [Tooltip("조준 평면의 높이. 발밑에서 이만큼 위다. PlayerMotor가 커서를 볼 때 쓰는 평면과 같아야 몸과 총알이 같은 곳을 본다.")]
@@ -39,6 +41,7 @@ namespace ByAWhisker.Player
             if (weapon == null) weapon = GetComponent<Weapon>();
             if (takedown == null) takedown = GetComponent<TakedownAction>();
             if (carry == null) carry = GetComponent<BodyCarry>();
+            if (exposure == null) exposure = GetComponent<PlayerExposure>();
 
             AimDirection = transform.forward;
         }
@@ -49,6 +52,7 @@ namespace ByAWhisker.Player
             input.ReloadRequested += OnReload;
             input.TakedownRequested += OnTakedown;
             input.CarryRequested += OnCarry;
+            if (weapon != null) weapon.Fired += OnWeaponFired;
         }
 
         private void OnDisable()
@@ -57,6 +61,7 @@ namespace ByAWhisker.Player
             input.ReloadRequested -= OnReload;
             input.TakedownRequested -= OnTakedown;
             input.CarryRequested -= OnCarry;
+            if (weapon != null) weapon.Fired -= OnWeaponFired;
         }
 
         private void Update()
@@ -126,6 +131,15 @@ namespace ByAWhisker.Player
 
             if (dropping) _overlay.Flash("내려놓았다");
             else _overlay.Flash(carry.IsCarrying ? "몸을 들었다" : "쓰러진 몸 쪽으로 더 가까이");
+        }
+
+        /// <summary>
+        /// 쏜 자리가 드러난다. 어둠 속 탐지 거리가 5m뿐이라, 섬광이 없으면 소음기 권총이
+        /// 사거리 11m 안에서 아무 대가 없이 이긴다.
+        /// </summary>
+        private void OnWeaponFired(Vector3 hitPoint)
+        {
+            if (exposure != null) exposure.FlashFromMuzzle();
         }
     }
 }

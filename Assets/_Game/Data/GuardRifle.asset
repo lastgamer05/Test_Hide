@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.WeaponSettings
   range: 20
   spreadDegrees: 4
-  fireInterval: 0.9
+  fireInterval: 0.15
   magazine: 8
   reserveAmmo: -1
   reloadSeconds: 2.2

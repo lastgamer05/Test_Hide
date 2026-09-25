@@ -10,6 +10,7 @@ namespace ByAWhisker.AI
     /// 경비의 사격. 겨누기와 쏘기의 상태는 여기서만 굴리고 GuardBrain은 Engage/Disengage로 켜고 끄기만 한다.
     /// 한 대 맞으면 끝나는 게임이라 예고 없는 사격은 불합리하게 느껴진다.
     /// 그래서 순서를 뒤집을 수 없게 만들었다. 반드시 aimSeconds만큼 겨눈 뒤에야 방아쇠로 넘어간다.
+    /// 겨누기 → 연사 → 회복의 한 바퀴다. 매서워지는 쪽은 연사뿐이고, 앞의 예고는 건드리지 않는다.
     /// </summary>
     public class GuardGunner : MonoBehaviour
     {
@@ -27,6 +28,10 @@ namespace ByAWhisker.AI
         [Tooltip("대상에 PlayerExposure가 없을 때 쓸 높이. 발밑이 아니라 몸통을 겨눈다.")]
         [SerializeField] private float targetHeight = 1f;
 
+        [Header("연사")]
+        [Tooltip("연사 한 번에 더 주는 여유 시간(초). 예상 시간(발 수 x 간격)에 이만큼을 더한 것이 상한이고, 넘기면 남은 발을 버리고 회복으로 간다. 총 쪽 fireInterval이 길어 발이 밀릴 때 연사가 끝나지 않는 것을 막는 안전장치다.")]
+        [SerializeField] private float burstGraceSeconds = 1f;
+
         private Transform _target;
 
         // 자세에 따라 겨누는 높이가 달라진다. Bind에서 한 번 찾아 두고 매 프레임 GetComponent를 부르지 않는다.
@@ -36,8 +41,14 @@ namespace ByAWhisker.AI
         private float _aimTimer;      // 지금까지 겨눈 시간
         private float _lostTimer;     // 대상을 못 보고 흐른 시간
         private float _recoverTimer;  // 다음 조준까지 남은 시간
+        private int _burstLeft;       // 이번 연사에 남은 발 수
+        private float _shotTimer;     // 다음 발까지 남은 시간
+        private float _burstTimeLeft; // 이번 연사에 남은 상한 시간
 
         public bool IsAiming { get; private set; }
+
+        /// <summary>연사 중인가. 겨누기가 끝난 다음의 짧은 구간이라 IsAiming과 동시에 참이 되지 않는다.</summary>
+        public bool IsFiring { get; private set; }
 
         /// <summary>0..1. 1이면 곧 쏜다.</summary>
         public float AimProgress { get; private set; }
@@ -116,7 +127,7 @@ namespace ByAWhisker.AI
 
             if (!_engaged || settings == null || weapon == null || perception == null || _target == null)
             {
-                if (IsAiming) ClearAim();
+                if (IsAiming || IsFiring) ClearAim();
                 return;
             }
 
@@ -134,6 +145,8 @@ namespace ByAWhisker.AI
                 if (_lostTimer >= Mathf.Max(0f, settings.loseAimSeconds))
                 {
                     // 완전히 따돌렸다. 다시 보이면 조준은 처음부터다.
+                    // 쏘던 중이었으면 남은 발은 버린다. 이미 없는 대상 자리에 탄창을 쏟는 경비는 우스워 보인다.
+                    if (IsFiring) EndBurst();
                     ClearAim();
                     return;
                 }
@@ -141,6 +154,13 @@ namespace ByAWhisker.AI
 
             // 무기는 스스로 재장전하지 않는다. 빈 탄창을 채우라고 시키는 것은 쏘는 쪽 몫이다.
             if (weapon.Ammo <= 0 && !weapon.IsReloading) weapon.Reload();
+
+            // 연사는 겨누기와 회복 사이에 끼어 있다. 시작된 뒤에는 조준을 다시 세지 않고 남은 발만 마저 쏜다.
+            if (IsFiring)
+            {
+                TickBurst(dt);
+                return;
+            }
 
             if (_recoverTimer > 0f)
             {
@@ -162,7 +182,14 @@ namespace ByAWhisker.AI
             if (!acquired) return;
             if (_aimTimer < aimSeconds) return;
 
-            TryShoot();
+            // 탄이 없거나 재장전 중이면 겨눈 채로 기다린다. 진행도는 1에 멈춰 있어서
+            // 플레이어에게는 "언제 터질지 모르는 상태"로 보인다.
+            if (!weapon.CanFire) return;
+
+            // 조준이 다 찼다. 여기서부터 방아쇠는 연사가 맡는다. 같은 프레임에 첫 발이 나가야
+            // 예고가 끝나는 순간과 총성이 어긋나지 않는다.
+            BeginBurst();
+            TickBurst(dt);
         }
 
         /// <summary>보이고, 사거리 안이다. 둘 중 하나라도 아니면 조준은 차지 않는다.</summary>
@@ -174,24 +201,91 @@ namespace ByAWhisker.AI
             return Sight.HorizontalDistance(transform.position, AimPoint) <= settings.fireRange;
         }
 
-        private void TryShoot()
+        /// <summary>겨누기가 끝났다. 여기서부터는 조준을 다시 세지 않는다.</summary>
+        private void BeginBurst()
         {
-            // 탄이 없거나 재장전 중이면 겨눈 채로 기다린다. 진행도는 1에 멈춰 있어서
-            // 플레이어에게는 "언제 터질지 모르는 상태"로 보인다.
-            if (!weapon.CanFire) return;
+            IsFiring = true;
+            IsAiming = false;
+            AimProgress = 0f;
+            _aimTimer = 0f;
 
+            _burstLeft = Mathf.Max(1, settings.burstCount);
+            _shotTimer = 0f;
+            _burstTimeLeft = BurstTimeout();
+        }
+
+        private void TickBurst(float dt)
+        {
+            // 탄창이 비어 장전이 걸리면 연사는 거기서 끝난다. 장전을 기다렸다 이어 쏘면
+            // 몇 초 전에 끝난 예고로 총알이 나가는 꼴이 된다. 다시 겨누는 편이 정직하다.
+            if (weapon.IsReloading)
+            {
+                EndBurst();
+                return;
+            }
+
+            // 총이 아직 안 된다고 하면(제 fireInterval이 남았다) 간격을 다시 세지 않고 그냥 둔다.
+            // _shotTimer가 0 아래에 머무르니 다음 프레임에 곧장 다시 두드린다.
+            _shotTimer -= dt;
+            if (_shotTimer <= 0f && Shoot())
+            {
+                _burstLeft--;
+                if (_burstLeft <= 0)
+                {
+                    EndBurst();
+                    return;
+                }
+
+                _shotTimer = Mathf.Max(0f, settings.burstInterval);
+            }
+
+            // 총 쪽 fireInterval이 burstInterval보다 길면 발이 계속 밀린다. 상한이 없으면 그대로
+            // 연사에 매달려 회복도 조준도 못 한다. 남은 발을 버리더라도 반드시 끝낸다.
+            // 상한을 한 발 두드려 본 뒤에 보는 것은 여유를 0으로 잡아도 첫 발은 나가게 하려는 것이다.
+            _burstTimeLeft -= dt;
+            if (_burstTimeLeft <= 0f) EndBurst();
+        }
+
+        /// <summary>한 발. 총이 거절하면 false.</summary>
+        private bool Shoot()
+        {
             Vector3 origin = FireOrigin();
             Vector3 direction = AimPoint - origin;
-            if (direction.sqrMagnitude < 0.0001f) return;
+            if (direction.sqrMagnitude < 0.0001f) return false;
 
-            if (!weapon.TryFire(origin, direction.normalized)) return;
-
-            _aimTimer = 0f;
-            AimProgress = 0f;
-            IsAiming = false;
-            _recoverTimer = Mathf.Max(0f, settings.recoverSeconds);
+            if (!weapon.TryFire(origin, direction.normalized)) return false;
 
             if (Fired != null) Fired();
+            return true;
+        }
+
+        /// <summary>연사를 끝내고 회복으로 넘긴다. 다 쏘고 끝나든 중간에 끊기든 쉬는 틈은 똑같이 준다.</summary>
+        private void EndBurst()
+        {
+            CancelBurst();
+            _recoverTimer = Mathf.Max(0f, settings.recoverSeconds);
+        }
+
+        /// <summary>연사 상태만 지운다. 회복은 걸지 않는다. 전투 자체가 끝날 때 쓴다.</summary>
+        private void CancelBurst()
+        {
+            IsFiring = false;
+            _burstLeft = 0;
+            _shotTimer = 0f;
+            _burstTimeLeft = 0f;
+        }
+
+        /// <summary>
+        /// 연사 한 번에 허용하는 시간. 실제로 발을 미루는 쪽은 둘 중 긴 간격이라 그걸로 잡고,
+        /// 간격이 0이어도 상한이 0이 되지 않도록 여유를 더한다.
+        /// </summary>
+        private float BurstTimeout()
+        {
+            float step = Mathf.Max(0f, settings.burstInterval);
+            if (weapon.Settings != null) step = Mathf.Max(step, weapon.Settings.fireInterval);
+
+            int shots = Mathf.Max(1, settings.burstCount);
+            return shots * step + Mathf.Max(0f, burstGraceSeconds);
         }
 
         private Vector3 FireOrigin()
@@ -214,6 +308,9 @@ namespace ByAWhisker.AI
             _lostTimer = 0f;
             AimProgress = 0f;
             IsAiming = false;
+
+            // 조준이 지워졌는데 연사만 남아 있으면 겨누지 않은 총이 계속 나간다.
+            CancelBurst();
         }
 
         private void HandleRunReset()

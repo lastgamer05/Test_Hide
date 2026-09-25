@@ -1,0 +1,105 @@
+# M8 — 경비를 상대로 만든다
+
+M7으로 총알과 시체를 조였는데도 총이 이긴다. 이유는 총 쪽이 아니라 경비 쪽에 있다.
+경비는 알아채는 데 1초가 걸리고, 겨누는 데 1.2초를 더 쓰고, 12m까지 붙어야 쏘고,
+0.9초에 한 발을 쏜다. 그 사이 플레이어는 이미 쏘고 돌아섰다. 또 총에 맞아도 서 있던
+자리에 그대로 서 있는다.
+
+세 갈래로 나눠 고친다. 서로 다른 파일을 건드리므로 병렬로 만든다.
+
+## A. 총소리를 들으면 숨는다
+
+경비가 총격을 받으면 가까운 엄폐물 뒤로 붙었다가, 거기서 겨누고 쏜다.
+지금은 맞을 때까지 벌판에 서 있어서 사격전이 성립하지 않는다.
+
+- 새 컴포넌트 `AI/GuardCover.cs`.
+- `public bool HasCover`, `public Vector3 CoverPosition`, `public bool InCover`.
+- `public bool FindCover(Vector3 threat)` — 위협 쪽에서 몸을 가려 주는 자리를 찾는다.
+  주변 엄폐물(직렬화된 `coverMask`, HighCover와 LowCover) 둘레의 후보를 훑어,
+  위협에서 그 자리로 가는 시선이 막히는 곳을 고른다. `NavMesh.SamplePosition`으로
+  갈 수 있는 자리인지도 본다. 매 프레임 할당을 만들지 마라.
+- `GuardBrain`에 `State.TakeCover`를 더한다. Alert 중에 총을 맞거나 총성을 들으면
+  이 상태로 들어가 `CoverPosition`으로 달린다. 도착하면 다시 Alert로 돌아가 쏜다.
+  엄폐물을 못 찾으면 예전처럼 곧장 쫓는다.
+- 엄폐 중에도 `GuardGunner`가 쏠 수 있어야 한다. 도착한 뒤에는 멈춰서 겨눈다.
+
+건드리는 파일: `AI/GuardCover.cs`(새 파일), `AI/GuardBrain.cs`.
+
+## B. 총이 매서워진다
+
+- `GuardCombatSettings`에 연사를 더한다. `burstCount`(한 번 겨눈 뒤 쏘는 발수),
+  `burstInterval`(발 사이 간격).
+- `GuardGunner`가 그 값대로 쏜다. 겨누기 → 연사 → 회복의 순서는 그대로 지킨다.
+  예고 없는 사격은 여전히 없다.
+- `public bool IsFiring` — 연사 중인가. 표시와 두뇌가 쓴다.
+- 대상을 놓치면 연사를 끊는다. 빈 자리에 계속 쏘지 않는다.
+
+건드리는 파일: `AI/GuardGunner.cs`, `AI/GuardCombatSettings.cs`.
+
+## C. 눈치가 빨라진다
+
+- 총성을 들으면 의심도가 단번에 오른다. 지금은 발소리와 똑같이 취급해서,
+  바로 옆에서 총을 쏴도 천천히 차오른다. `NoiseKind.Gunshot`을 따로 본다.
+  얼마나 오를지는 직렬화 필드로 둬라.
+- 한 경비가 플레이어를 보면 가까운 동료도 함께 긴장한다. 직렬화된 반경 안의
+  `GuardPerception`에게 의심도를 나눠 준다. 나눠 주는 값과 반경은 직렬화 필드로.
+  매 프레임 다른 경비를 찾지 마라 — 간격을 두고 훑거나 한 번 모아 둬라.
+- `public void Alarm(float amount, Vector3 origin)` — 밖에서 의심도를 올리는 통로.
+  올린 뒤 `LastKnownPosition`을 origin으로 둔다.
+
+건드리는 파일: `AI/GuardPerception.cs`.
+
+## D. 숫자와 배치 (통합 담당이 직접)
+
+- `HumanGuard.asset`: `detectSeconds` 1 → 0.45.
+- `GuardCombat.asset`: `fireRange` 12 → 17, `aimSeconds` 1.2 → 0.7, `recoverSeconds` 1 → 0.7.
+- `GuardRifle.asset`: `fireInterval` 0.9 → 0.35.
+- `GuardBrain`의 속도: 순찰 1.6 → 2.0, 수색 2.4 → 3.0, 추격 3.8 → 4.6.
+- 경비 수를 여덟에서 더 늘린다.
+
+## 규칙
+
+- 공개 멤버 이름과 서명을 위에 적은 대로 맞춘다. 통합 담당이 이 이름으로 잇는다.
+- 맡은 파일 밖은 읽기만 한다.
+- 숫자는 코드에 박지 않는다. 직렬화 필드나 ScriptableObject로 뺀다.
+- 매 프레임 할당을 만들지 않는다. 물리 질의는 `NonAlloc`을 쓴다.
+- 레이어 번호를 코드에 적지 않는다. `LayerMask`를 직렬화 필드로 받는다.
+- `.meta` 파일을 만들지 않는다.
+- 주석은 한국어로, 무엇이 아니라 왜를 적는다. 주위 코드의 밀도에 맞춘다.
+
+## E. 총구 섬광 (통합 중에 드러나서 더한 것)
+
+A~D를 다 넣고도 어둠 속에서는 총이 여전히 공짜였다. 이유는 경비 쪽이 아니라 빛에 있다.
+경비의 탐지 거리는 어두우면 5m, 밝으면 16m인데 권총 사거리가 11m다. 창고는 램프 둘레만
+밝으므로, 플레이어는 어둠에서 11m 밖... 이 아니라 **어둠에서 5m 밖**이면 영영 보이지 않는
+자리에 서서 쏠 수 있었다. M8의 빨라진 눈도 소용이 없다. 보이지 않는 것은 빨리 볼 수 없다.
+
+- `PlayerExposure.FlashFromMuzzle()` — 쏜 순간 `Light`를 `muzzleFlashLight`(1)로 올리고
+  `muzzleFlashSeconds`(0.6) 동안 사그라들게 한다. 램프가 만드는 밝기와 따로 두고 둘 중 큰 값을 쓴다.
+- `PlayerCombat`이 `Weapon.Fired`를 듣고 부른다.
+
+이 0.6초 동안 탐지 거리가 5m에서 16m로 벌어진다. 마주 본 경비는 그 사이에 의심도를 채운다.
+한 발로 곧장 발각되지는 않는다 — 거리가 멀수록 의심도가 천천히 차는 `farDetectScale`이
+그대로 걸려 있어서, 먼 곳에서 한 발은 "무언가 있다"(Search)까지만 올린다.
+
+## 통합 메모
+
+에이전트 셋이 각자 맡은 파일만 고쳐 충돌은 없었다. 통합에서 손본 것 둘.
+
+**연사 중에도 멈춰야 한다.** `GuardBrain.TickAlert`는 `gunner.IsAiming`일 때만 멈췄는데,
+연사 구간에서는 `IsAiming`이 내려간다. `IsFiring`도 같이 보게 고쳤다. 안 그러면 쏘면서 걷는다.
+
+**무기의 연사 간격이 점사를 막았다.** `GuardCombatSettings.burstInterval` 0.18보다
+`GuardRifle.fireInterval`이 길면 실제 간격은 무기 쪽에 맞춰진다. 0.35로 잡았던 것을 0.15로 내려
+점사가 점사처럼 나오게 했다. 사격 사이의 호흡은 `recoverSeconds`(0.7)가 맡는다.
+
+`GuardCover.blockers`에는 LowCover를 넣지 않았다. 경비는 서서 다녀서 낮은 엄폐물로는 실제로
+가려지지 않는다. 다만 `coverMask`에는 넣어 두어, 낮은 엄폐물 **둘레**도 후보 자리로는 본다.
+
+## 확인한 값 (플레이)
+
+- 경비 12명, 순찰 2.0 / 수색 3.0 / 추격 4.6. 플레이어 걷기 3.6이라 걸어서는 못 도망친다.
+- 밝은 곳에서 4m 정면: 의심도 0 → 1.00, Alert 진입, 조준 진행도 0.57까지 참.
+- 같은 순간 7.4m 떨어진 동료가 플레이어를 보지 못한 채 의심도 0.96까지 올라
+  `TakeCover`로 들어가 엄폐물로 달렸다. 동료 전파와 엄폐가 함께 돈다.
+- 어둠(빛 0.00)에서 한 발 쏘면 빛이 1.00으로 튄다. 14~16m 밖 경비 둘이 Search로 올라왔다.

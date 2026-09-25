@@ -27,6 +27,18 @@ namespace ByAWhisker.AI
         [Tooltip("이 시간 안에 난 소리까지 듣는다. 한 프레임만 보면 발소리를 놓친다.")]
         [SerializeField] private float hearingMemory = 0.35f;
 
+        [Header("총성")]
+        [Tooltip("총성 한 번에 오르는 의심도. 발소리처럼 천천히 차면 코앞에서 쏴도 알아채지 못한다.")]
+        [SerializeField] private float gunshotAwareness = 0.9f;
+
+        [Header("동료")]
+        [Tooltip("플레이어를 보고 있을 때 의심을 나눠 줄 거리(m).")]
+        [SerializeField] private float allyAlertRadius = 14f;
+        [Tooltip("그 동료에게 나눠 주는 초당 의심도. 본 쪽보다 느리게 차야 눈으로 본 경비가 먼저 움직인다.")]
+        [SerializeField] private float allyAlertPerSecond = 0.5f;
+        [Tooltip("동료를 훑는 간격(초). 매 프레임 거리를 다시 잴 만큼 급한 판정이 아니다.")]
+        [SerializeField] private float allyScanInterval = 0.25f;
+
         [Header("시체")]
         [Tooltip("쓰러진 몸이 있는 레이어. Enemy와 Player.")]
         [SerializeField] private LayerMask bodyMask;
@@ -58,6 +70,20 @@ namespace ByAWhisker.AI
 
         // 한 번 놀란 몸은 여기 적어 둔다. 안 그러면 경비가 시체 앞을 영영 떠나지 못한다.
         private readonly HashSet<int> _handledBodies = new HashSet<int>();
+
+        // 씬의 경비를 한 번 모아 두고 재사용한다. 레벨이 만들어진 뒤로 경비는 늘지 않으므로
+        // 매 프레임은커녕 두 번 찾을 일도 없다. BodyCarry가 시체를 모으는 방식과 같다.
+        private GuardPerception[] _allies;
+        private float _nextAllyScan;
+        private float _lastAllySpread;
+
+        // 같은 총성이 hearingMemory 동안 버퍼에 남아 있다. 한 발에 한 번만 놀라려고
+        // 마지막으로 반응한 총성의 시각을 적어 둔다.
+        private float _lastGunshotTime;
+
+        // 밖에서 들어온 경보. Alarm은 남의 Update에서도 불리는데 이쪽 Update가 그 뒤에 돌면
+        // 두뇌가 읽기도 전에 HeardSomething이 지워진다. 그래서 한 프레임 더 들고 있는다.
+        private bool _alarmed;
 
         /// <summary>0..1. 1이면 완전히 들킨 것이다.</summary>
         public float Awareness { get; private set; }
@@ -120,6 +146,30 @@ namespace ByAWhisker.AI
             _handledBodies.Clear();
             _visibleBody = null;
             _nextBodyScan = 0f;
+
+            _alarmed = false;
+            _nextAllyScan = 0f;
+            _lastAllySpread = 0f;
+
+            // 재시작하면 소리 버스도 비워지지만, 방금 전 총성에 다시 놀라지 않게 기준 시각을 지금으로 당긴다.
+            _lastGunshotTime = Time.time;
+        }
+
+        /// <summary>
+        /// 밖에서 의심도를 올리는 통로. 총성도 동료의 전파도 모두 여기로 모인다.
+        /// 올린 자리를 마지막 단서로 삼아야 두뇌가 그쪽을 뒤지러 간다.
+        /// </summary>
+        public void Alarm(float amount, Vector3 origin)
+        {
+            if (amount <= 0f) return;
+
+            Awareness = Mathf.Clamp01(Awareness + amount);
+            LastKnownPosition = origin;
+
+            // 두뇌는 HeardSomething을 보고 Search로 올린다. 총성이든 동료의 외침이든
+            // "무언가 있었다"는 단서인 것은 같다.
+            HeardSomething = true;
+            _alarmed = true;
         }
 
         /// <summary>
@@ -145,12 +195,16 @@ namespace ByAWhisker.AI
             SeesBody = false;
             _visibleBody = null;
             _nextBodyScan = 0f;
+            _alarmed = false;
         }
 
         private void Update()
         {
             // 한 프레임짜리 값이라 판정을 새로 하기 전에 먼저 지운다.
-            HeardSomething = false;
+            // 다만 밖에서 온 경보는 남의 Update에서 들어오므로, 여기서 곧장 지우면 순서에 따라
+            // 두뇌가 한 번도 못 보고 지나간다. 그 한 프레임만 살려서 넘긴다.
+            HeardSomething = _alarmed;
+            _alarmed = false;
 
             if (profile == null)
             {
@@ -176,6 +230,7 @@ namespace ByAWhisker.AI
 
             UpdateSight(targetPoint, dt);
             UpdateHearing();
+            SpreadToAllies();
         }
 
         private void UpdateSight(Vector3 targetPoint, float dt)
@@ -271,6 +326,7 @@ namespace ByAWhisker.AI
         /// <summary>
         /// 소리 버스에 쌓인 최근 사건을 훑는다. 인간은 귀가 약해서 사건의 반경을
         /// hearingMultiplier만큼 줄여서 듣고, 벽은 따지지 않는다.
+        /// 총성만은 발소리와 다르게 의심도를 단번에 올린다. 벽을 안 따지는 것은 총성도 같다.
         /// </summary>
         private void UpdateHearing()
         {
@@ -278,15 +334,27 @@ namespace ByAWhisker.AI
             int count = NoiseBus.Collect(ear, hearingMemory, _heard);
 
             float loudest = 0f;
+            float newestGunshot = _lastGunshotTime;
+            Vector3 gunshotAt = ear;
+
             for (int i = 0; i < count; i++)
             {
                 NoiseEvent evt = _heard[i];
 
                 // 자기 발소리는 듣지 않는다. 안 그러면 순찰만 해도 제 소리에 놀란다.
+                // 제 총성도 같은 길로 걸러진다. 쏘는 경비가 제 소리에 놀랄 일은 없다.
                 if (evt.source == gameObject) continue;
 
                 float radius = evt.radius * profile.hearingMultiplier;
                 if (Sight.HorizontalDistance(ear, evt.position) > radius) continue;
+
+                // 한 발이 hearingMemory 동안 버퍼에 남으므로, 아직 반응하지 않은 총성만 센다.
+                // 안 그러면 한 발에 여러 프레임 놀라서 늘 즉시 발각된다.
+                if (evt.kind == NoiseKind.Gunshot && evt.time > newestGunshot)
+                {
+                    newestGunshot = evt.time;
+                    gunshotAt = evt.position;
+                }
 
                 // 여러 소리가 겹치면 가장 큰 쪽을 향한다.
                 if (evt.loudness < loudest) continue;
@@ -295,6 +363,64 @@ namespace ByAWhisker.AI
                 HeardSomething = true;
                 LastKnownPosition = evt.position;
             }
+
+            // 발소리 판정 뒤에 둔다. 발소리와 총성이 겹쳐 들렸으면 총성 쪽이 마지막 단서가 되어야 한다.
+            if (newestGunshot > _lastGunshotTime)
+            {
+                _lastGunshotTime = newestGunshot;
+                Alarm(gunshotAwareness, gunshotAt);
+            }
+        }
+
+        /// <summary>
+        /// 플레이어를 보고 있으면 가까운 동료도 함께 긴장한다. 혼자 보고 혼자 쫓다 죽는 대신
+        /// 주변이 같이 깨어나게 하는 장치다. 나눠 주는 쪽은 자기 의심도를 잃지 않는다.
+        /// 간격을 두는 이유는 거리 계산이 아니라 경비 수만큼 도는 고리를 매 프레임 돌리지 않으려는 것이다.
+        /// </summary>
+        private void SpreadToAllies()
+        {
+            if (!CanSeePlayer || allyAlertPerSecond <= 0f || allyAlertRadius <= 0f) return;
+            if (Time.time < _nextAllyScan) return;
+
+            float interval = Mathf.Max(0.02f, allyScanInterval);
+            // 한동안 못 보다가 다시 본 경우 밀린 시간을 한꺼번에 주면 동료가 단번에 깨어난다. 한 간격까지만 친다.
+            float elapsed = _lastAllySpread > 0f
+                ? Mathf.Min(Time.time - _lastAllySpread, interval)
+                : interval;
+
+            _lastAllySpread = Time.time;
+            _nextAllyScan = Time.time + interval;
+
+            EnsureAllies();
+
+            float amount = allyAlertPerSecond * elapsed;
+            float sqrRadius = allyAlertRadius * allyAlertRadius;
+
+            for (int i = 0; i < _allies.Length; i++)
+            {
+                GuardPerception ally = _allies[i];
+                if (ally == null || ally == this) continue;
+
+                // 쓰러졌거나 기절한 경비는 깨어나지 않는다. 같은 클래스라 남의 _self를 그대로 읽는다.
+                if (ally._self != null && IsBody(ally._self)) continue;
+
+                Vector3 delta = ally.transform.position - transform.position;
+                delta.y = 0f;
+                if (delta.sqrMagnitude > sqrRadius) continue;
+
+                // 내가 본 자리를 그대로 넘긴다. 동료는 플레이어를 못 봤으니 이 자리가 유일한 단서다.
+                ally.Alarm(amount, LastKnownPosition);
+            }
+        }
+
+        /// <summary>
+        /// 경비 목록을 처음 쓸 때 한 번만 모은다. 레벨은 재시작해도 다시 지어지지 않고
+        /// 경비도 그 자리에서 되살아나므로 이 목록은 판이 바뀌어도 그대로 쓸 수 있다.
+        /// </summary>
+        private void EnsureAllies()
+        {
+            if (_allies != null) return;
+            _allies = FindObjectsByType<GuardPerception>(FindObjectsSortMode.None);
         }
 
         /// <summary>

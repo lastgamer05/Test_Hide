@@ -39,6 +39,9 @@ namespace ByAWhisker.Senses
         // 이보다 멀리 뛰면 갱신과 갱신 사이가 비어서 자취가 점선으로 끊긴다.
         private const float MaxCellsPerStep = 1.5f;
 
+        // Configure 전에 활성 칸을 물어보는 쪽에 돌려줄 빈 목록. 매번 새로 만들면 그것부터 할당이다.
+        private static readonly int[] EmptyCells = new int[0];
+
         [Header("갱신")]
         [Tooltip("갱신 간격. 초. 매 프레임 돌릴 이유가 없다. 냄새는 천천히 움직인다.")]
         [SerializeField] private float updateInterval = 0.2f;
@@ -113,6 +116,52 @@ namespace ByAWhisker.Senses
 
         /// <summary>(minX, minZ, sizeX, sizeZ)</summary>
         public Vector4 WorldBounds { get { return _worldBounds; } }
+
+        /// <summary>격자 열 수. 칸을 그대로 픽셀로 옮기는 쪽이 텍스처 폭으로 쓴다.</summary>
+        public int GridCols { get { return _cols; } }
+
+        /// <summary>격자 행 수.</summary>
+        public int GridRows { get { return _rows; } }
+
+        /// <summary>칸 한 변의 길이. Configure가 상한 때문에 키웠을 수 있어 넘긴 값과 다를 수 있다.</summary>
+        public float CellSize { get { return _cellSize; } }
+
+        /// <summary>
+        /// 지금 냄새를 들고 있는 칸의 번호들. 번호는 row * GridCols + col이다.
+        /// 이 클래스가 격자 크기와 무관한 비용으로 도는 이유가 이 목록이니, 받아 가는 쪽도 같은 약속을 지켜야 한다.
+        /// 여기 없는 칸을 확인하겠다고 격자 전체를 훑으면 128x128에서 초당 8만 칸이 되어 이득이 통째로 사라진다.
+        /// 목록은 갱신마다 통째로 바뀐다. 들고 있지 말고 쓸 때마다 다시 물어라.
+        /// </summary>
+        public IReadOnlyList<int> ActiveCells
+        {
+            get { return _readActive != null ? (IReadOnlyList<int>)_readActive : EmptyCells; }
+        }
+
+        /// <summary>
+        /// 칸 번호로 그 칸의 값을 읽는다. ActiveCells와 짝으로 쓴다. 읽을 만한 냄새가 없으면 false다.
+        /// ScentReading을 돌려주지 않는 이유는 기울기다. 기울기 한 번에 표집이 네 번 더 드는데,
+        /// 칸을 통째로 훑는 쪽은 방향이 필요 없다. 방향까지 필요한 곳은 지금처럼 TrySample을 쓴다.
+        /// </summary>
+        public bool TryReadCell(int cellIndex, out float strength, out int ownerId, out float age)
+        {
+            strength = 0f;
+            ownerId = 0;
+            age = 0f;
+
+            if (!_configured) return false;
+            if (cellIndex < 0 || cellIndex >= _readStrength.Length) return false;
+
+            strength = _readStrength[cellIndex];
+            if (strength < _minStrength)
+            {
+                strength = 0f;
+                return false;
+            }
+
+            ownerId = _readOwner[cellIndex];
+            age = _readAge[cellIndex];
+            return true;
+        }
 
         private void Start()
         {

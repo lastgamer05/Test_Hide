@@ -7,8 +7,11 @@ using ByAWhisker.Senses;
 namespace ByAWhisker.UI
 {
     /// 감각 표시를 담당한다. 캔버스와 위젯은 코드로 만든다. 프리팹을 쓰지 않는다.
-    /// 보여 주는 것은 넷이다. 내가 내는 소음, 내가 받는 빛, 최근에 난 소리의 방향, 근처 냄새 흔적.
+    /// 보여 주는 것은 셋이다. 내가 내는 소음, 내가 받는 빛, 최근에 난 소리의 방향과 거리와 종류.
     /// 전부 힌트다. 정확한 자리를 찍지 않고 방향과 세기만 말해 준다.
+    ///
+    /// 냄새는 화면이 아니라 월드 바닥에 그린다(ScentMapRenderer). 시야가 11m로 줄면서
+    /// 화면에서 소리가 차지할 자리가 커졌고, 소리는 원래 화면 말고는 보여 줄 데가 없다.
     [DisallowMultipleComponent]
     public class SenseHud : MonoBehaviour
     {
@@ -20,7 +23,7 @@ namespace ByAWhisker.UI
         [SerializeField] int sortingOrder = 100;
 
         [Header("갱신")]
-        [Tooltip("소리와 냄새를 다시 읽는 간격. 매 프레임 읽을 이유가 없다. 그리는 것은 매 프레임 한다.")]
+        [Tooltip("소리를 다시 읽는 간격. 매 프레임 읽을 이유가 없다. 그리는 것은 매 프레임 한다.")]
         [SerializeField, Range(0.02f, 0.5f)] float refreshInterval = 0.12f;
 
         [Tooltip("통합 담당이 Bind를 안 불렀을 때 시작하면서 스스로 찾아본다.")]
@@ -29,29 +32,20 @@ namespace ByAWhisker.UI
         // 소리 한 번에 몇 개까지 훑을지. 링 버퍼보다 넉넉하면 되고, 리스트는 한 번만 만든다.
         const int NoiseBufferCapacity = 64;
 
-        /// 호 하나가 들고 있는 것. 화면 각도는 카메라가 돌 수 있으니 매 프레임 다시 구한다.
+        /// 호 하나가 들고 있는 것. 화면 각도와 거리는 카메라도 나도 움직이니 매 프레임 다시 구한다.
         struct ArcSlot
         {
             public Vector3 position;
             public float startTime;
             public float loudness;
+            public NoiseKind kind;
             public float angle;    // 합치기 판정에만 쓰는 값
             public float weight;
-        }
-
-        /// 냄새 점 하나가 들고 있는 것. 자리는 플레이어 기준 오프셋으로 들고 있는다.
-        struct DotSlot
-        {
-            public Vector3 offset;    // 플레이어 기준 수평 오프셋
-            public Vector3 lean;      // 짙어지는 쪽 수평 방향
-            public float distance;
-            public float strength;
         }
 
         Transform _player;
         GameObject _playerRoot;
         Camera _camera;
-        ScentField _scentField;
         PlayerExposure _exposure;
 
         Canvas _canvas;
@@ -66,13 +60,7 @@ namespace ByAWhisker.UI
         ArcSlot[] _arcSlots;
         int _arcCount;
 
-        Image[] _dots;
-        RectTransform[] _dotRects;
-        DotSlot[] _dotSlots;
-        int _dotCount;
-
         List<NoiseEvent> _noiseBuffer;
-        Vector3[] _scentOffsets;
 
         float _shownNoise;
         float _shownLight;
@@ -90,10 +78,10 @@ namespace ByAWhisker.UI
             if (viewCamera != null) _camera = viewCamera;
         }
 
-        /// 냄새 격자를 준다. 비우면 냄새 점은 그냥 안 뜬다.
+        /// 냄새 격자를 받던 자리. 이제 HUD는 냄새를 그리지 않아서 아무것도 하지 않는다.
+        /// 씬 연결(GameBootstrap)이 이미 부르고 있어 서명만 남겨 둔다.
         public void SetScentField(ScentField field)
         {
-            _scentField = field;
         }
 
         /// 소음과 빛 수치를 읽어 올 곳을 준다. 비우면 막대가 숨는다.
@@ -118,7 +106,6 @@ namespace ByAWhisker.UI
             if (_exposure == null) SetExposure(FindAnyObjectByType<PlayerExposure>());
             if (_player == null && _exposure != null) Bind(_exposure.transform, _camera);
             if (_camera == null) _camera = Camera.main;
-            if (_scentField == null) SetScentField(FindAnyObjectByType<ScentField>());
         }
 
         void OnDestroy()
@@ -141,7 +128,6 @@ namespace ByAWhisker.UI
             if (_player == null || _camera == null)
             {
                 HideAllArcs();
-                HideAllDots();
                 return;
             }
 
@@ -150,12 +136,10 @@ namespace ByAWhisker.UI
             {
                 _refreshTimer = refreshInterval;
                 RefreshNoise();
-                RefreshScent();
             }
 
             // 카메라가 90도 돌아가는 중에도 방향이 어긋나지 않게 자리는 매 프레임 다시 잡는다.
             ApplyArcs();
-            ApplyDots();
         }
 
         void ResolveStyle()
@@ -229,59 +213,14 @@ namespace ByAWhisker.UI
             {
                 Image arc = SenseHudBuilder.CreateImage("Noise Arc " + i, _centerGroup, SenseHudBuilder.FadedBarSprite, Color.clear);
                 SenseHudBuilder.Anchor(arc.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
-                arc.rectTransform.sizeDelta = new Vector2(style.arcLengthQuiet, style.arcThickness);
+                arc.rectTransform.sizeDelta = new Vector2(style.arcLengthQuiet, style.arcThicknessFar);
                 arc.gameObject.SetActive(false);
 
                 _arcs[i] = arc;
                 _arcRects[i] = arc.rectTransform;
             }
 
-            int dotCount = Mathf.Max(1, style.maxScentDots);
-            _dots = new Image[dotCount];
-            _dotRects = new RectTransform[dotCount];
-            _dotSlots = new DotSlot[dotCount];
-
-            for (int i = 0; i < dotCount; i++)
-            {
-                Image dot = SenseHudBuilder.CreateImage("Scent Dot " + i, _centerGroup, SenseHudBuilder.SoftDotSprite, Color.clear);
-                SenseHudBuilder.Anchor(dot.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
-                dot.rectTransform.sizeDelta = new Vector2(style.scentDotSizeMin, style.scentDotSizeMin);
-                dot.gameObject.SetActive(false);
-
-                _dots[i] = dot;
-                _dotRects[i] = dot.rectTransform;
-            }
-
-            // 점은 소리 호보다 아래에 깔린다. 호가 가려지면 경고를 놓친다.
-            for (int i = 0; i < _arcs.Length; i++) _arcRects[i].SetAsLastSibling();
-
             _noiseBuffer = new List<NoiseEvent>(NoiseBufferCapacity);
-            BuildScentOffsets();
-        }
-
-        /// 냄새를 찍어 볼 자리를 미리 만들어 둔다. 월드 기준이라 카메라가 돌아도 표본이 흔들리지 않는다.
-        void BuildScentOffsets()
-        {
-            int rings = Mathf.Max(1, style.scentRings);
-            int perRing = Mathf.Max(3, style.scentSamplesPerRing);
-            float radius = Mathf.Max(0.1f, style.scentSampleRadius);
-
-            _scentOffsets = new Vector3[1 + rings * perRing];
-            _scentOffsets[0] = Vector3.zero;   // 발밑
-
-            int index = 1;
-            for (int r = 1; r <= rings; r++)
-            {
-                float ringRadius = radius * r / rings;
-                // 고리마다 반 칸씩 돌려 놓는다. 그래야 표본이 한 줄로 몰리지 않는다.
-                float twist = (r % 2 == 0) ? Mathf.PI / perRing : 0f;
-
-                for (int k = 0; k < perRing; k++)
-                {
-                    float a = twist + Mathf.PI * 2f * k / perRing;
-                    _scentOffsets[index++] = new Vector3(Mathf.Cos(a) * ringRadius, 0f, Mathf.Sin(a) * ringRadius);
-                }
-            }
         }
 
         void UpdateBars()
@@ -314,10 +253,10 @@ namespace ByAWhisker.UI
         {
             _arcCount = 0;
 
-            float maxAge = Mathf.Max(0.05f, style.arcFadeSeconds);
             Vector3 origin = _player.position;
 
-            int count = NoiseBus.Collect(origin, maxAge, _noiseBuffer);
+            // 종류마다 남는 시간이 달라서 가장 긴 쪽으로 걷어 온 뒤 하나씩 다시 잰다.
+            int count = NoiseBus.Collect(origin, style.LongestFadeSeconds(), _noiseBuffer);
             if (count > _noiseBuffer.Count) count = _noiseBuffer.Count;
 
             for (int i = 0; i < count; i++)
@@ -327,36 +266,44 @@ namespace ByAWhisker.UI
                 // 내가 낸 소리는 이미 아는 정보다. 화면을 어지럽히기만 한다.
                 if (IsOwnSource(evt.source)) continue;
 
+                float life = style.FadeSecondsFor(evt.kind);
                 float age = Time.time - evt.time;
                 if (age < 0f) age = 0f;
-                if (age >= maxAge) continue;
+                if (age >= life) continue;
+
+                Vector3 delta = evt.position - origin;
 
                 Vector2 dir;
-                if (!TryScreenDirection(evt.position - origin, out dir)) continue;
+                if (!TryScreenDirection(delta, out dir)) continue;
 
                 float loudness = Mathf.Clamp01(evt.loudness);
-                float weight = loudness * (1f - age / maxAge);
+                // 가까운 소리가 더 급한 정보다. 거리를 가중치에 넣지 않으면 멀리서 난 총성이
+                // 등 뒤 발소리를 밀어내고 자리를 차지한다.
+                float near = 1f - Distance01(delta);
+                float weight = loudness * (1f - age / life) * Mathf.Lerp(style.arcFarWeightScale, 1f, near);
                 if (weight <= 0.001f) continue;
 
-                AddArc(evt.position, evt.time, loudness, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg, weight);
+                AddArc(evt.position, evt.time, loudness, evt.kind, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg, weight);
             }
         }
 
         /// 비슷한 방향의 소리는 하나로 합친다. 발소리가 이어지면 호가 줄줄이 뜨기 때문이다.
-        void AddArc(Vector3 position, float time, float loudness, float angle, float weight)
+        void AddArc(Vector3 position, float time, float loudness, NoiseKind kind, float angle, float weight)
         {
             for (int i = 0; i < _arcCount; i++)
             {
+                // 종류가 다르면 합치지 않는다. 총성이 발소리에 먹히면 가장 급한 정보를 놓친다.
+                if (_arcSlots[i].kind != kind) continue;
                 if (Mathf.Abs(Mathf.DeltaAngle(angle, _arcSlots[i].angle)) > style.arcMergeDegrees) continue;
 
                 // 같은 방향이면 더 센 쪽만 남긴다.
-                if (weight > _arcSlots[i].weight) SetArc(i, position, time, loudness, angle, weight);
+                if (weight > _arcSlots[i].weight) SetArc(i, position, time, loudness, kind, angle, weight);
                 return;
             }
 
             if (_arcCount < _arcSlots.Length)
             {
-                SetArc(_arcCount, position, time, loudness, angle, weight);
+                SetArc(_arcCount, position, time, loudness, kind, angle, weight);
                 _arcCount++;
                 return;
             }
@@ -368,21 +315,21 @@ namespace ByAWhisker.UI
                 if (_arcSlots[i].weight < _arcSlots[weakest].weight) weakest = i;
             }
 
-            if (weight > _arcSlots[weakest].weight) SetArc(weakest, position, time, loudness, angle, weight);
+            if (weight > _arcSlots[weakest].weight) SetArc(weakest, position, time, loudness, kind, angle, weight);
         }
 
-        void SetArc(int index, Vector3 position, float time, float loudness, float angle, float weight)
+        void SetArc(int index, Vector3 position, float time, float loudness, NoiseKind kind, float angle, float weight)
         {
             _arcSlots[index].position = position;
             _arcSlots[index].startTime = time;
             _arcSlots[index].loudness = loudness;
+            _arcSlots[index].kind = kind;
             _arcSlots[index].angle = angle;
             _arcSlots[index].weight = weight;
         }
 
         void ApplyArcs()
         {
-            float maxAge = Mathf.Max(0.05f, style.arcFadeSeconds);
             Vector3 origin = _player.position;
 
             for (int i = 0; i < _arcs.Length; i++)
@@ -393,9 +340,16 @@ namespace ByAWhisker.UI
                     continue;
                 }
 
-                float fade = 1f - (Time.time - _arcSlots[i].startTime) / maxAge;
+                NoiseKind kind = _arcSlots[i].kind;
+                float life = style.FadeSecondsFor(kind);
+                float age = Time.time - _arcSlots[i].startTime;
+                if (age < 0f) age = 0f;
+
+                float fade = 1f - age / life;
+                Vector3 delta = _arcSlots[i].position - origin;
+
                 Vector2 dir;
-                if (fade <= 0f || !TryScreenDirection(_arcSlots[i].position - origin, out dir))
+                if (fade <= 0f || !TryScreenDirection(delta, out dir))
                 {
                     SenseHudBuilder.SetVisible(_arcs[i], false);
                     continue;
@@ -404,87 +358,30 @@ namespace ByAWhisker.UI
                 SenseHudBuilder.SetVisible(_arcs[i], true);
 
                 float loudness = _arcSlots[i].loudness;
+                // 소리가 난 자리는 그대로여도 내가 움직이니 거리는 매 프레임 다시 잰다.
+                float far = Distance01(delta);
                 RectTransform rect = _arcRects[i];
 
-                rect.anchoredPosition = dir * style.arcRadius;
+                // 가까운 소리는 몸에 붙고 먼 소리는 화면 가장자리로 간다. 방향만 알던 것에 거리가 붙는다.
+                rect.anchoredPosition = dir * Mathf.Lerp(style.arcRadiusNear, style.arcRadiusFar, far);
                 // 막대는 가로로 누워 있으니 방향각에 90도를 더해 원의 접선으로 세운다.
                 rect.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg + 90f);
 
-                float length = Mathf.Lerp(style.arcLengthQuiet, style.arcLengthLoud, loudness);
-                SetSize(rect, length, style.arcThickness);
+                // 갓 난 소리는 잠깐 커졌다 가라앉는다. 가만히 떠 있기만 하면 새로 난 것을 놓친다.
+                float pop = 1f + Mathf.Max(0f, style.arcPopScale - 1f) *
+                    (1f - Mathf.Clamp01(age / Mathf.Max(0.01f, style.arcPopSeconds)));
+                float emphasis = style.ArcEmphasis(kind) * pop;
 
-                Color color = Color.Lerp(style.arcQuietColor, style.arcLoudColor, loudness);
+                float length = Mathf.Lerp(style.arcLengthQuiet, style.arcLengthLoud, loudness) * emphasis;
+                float thickness = Mathf.Lerp(style.arcThicknessNear, style.arcThicknessFar, far) * emphasis;
+                SetSize(rect, length, thickness);
+
+                Color color = style.ArcColor(kind);
                 // 제곱으로 줄여야 끝물에 오래 붙어 있지 않고 깔끔하게 사라진다.
-                color.a = fade * fade * style.arcMaxAlpha * Mathf.Lerp(0.4f, 1f, loudness);
+                color.a = fade * fade * style.arcMaxAlpha
+                    * Mathf.Lerp(style.arcQuietAlphaScale, 1f, loudness)
+                    * Mathf.Lerp(1f, style.arcFarAlphaScale, far);
                 SetColor(_arcs[i], color);
-            }
-        }
-
-        void RefreshScent()
-        {
-            _dotCount = 0;
-
-            if (_scentField == null || !_scentField.IsConfigured) return;
-
-            Vector3 origin = _player.position;
-            float radius = Mathf.Max(0.1f, style.scentSampleRadius);
-            float halfLife = Mathf.Max(0.1f, style.scentAgeHalfLife);
-
-            for (int i = 0; i < _scentOffsets.Length && _dotCount < _dots.Length; i++)
-            {
-                ScentReading reading;
-                if (!_scentField.TrySample(origin + _scentOffsets[i], out reading)) continue;
-
-                float strength = Mathf.Clamp01(reading.strength);
-                if (strength < style.scentMinStrength) continue;
-
-                // 묵은 흔적은 흐려진다. 새 흔적과 옛 흔적이 같아 보이면 추적이 안 된다.
-                strength *= Mathf.Pow(0.5f, Mathf.Max(0f, reading.age) / halfLife);
-                if (strength < style.scentMinStrength) continue;
-
-                int slot = _dotCount++;
-                _dotSlots[slot].offset = _scentOffsets[i];
-                _dotSlots[slot].lean = reading.gradient;
-                _dotSlots[slot].distance = Mathf.Clamp01(_scentOffsets[i].magnitude / radius);
-                _dotSlots[slot].strength = strength;
-
-                float size = Mathf.Lerp(style.scentDotSizeMin, style.scentDotSizeMax, strength);
-                SetSize(_dotRects[slot], size, size);
-
-                Color color = style.OwnerColor(reading.ownerId);
-                color.a = strength * style.scentMaxAlpha;
-                SetColor(_dots[slot], color);
-            }
-        }
-
-        void ApplyDots()
-        {
-            for (int i = 0; i < _dots.Length; i++)
-            {
-                if (i >= _dotCount)
-                {
-                    SenseHudBuilder.SetVisible(_dots[i], false);
-                    continue;
-                }
-
-                Vector2 dir;
-                Vector2 position = Vector2.zero;
-
-                // 실제 거리에 비례해 찍으면 냄새 지도가 되어 버린다. 가까운 띠 안으로 눌러 넣는다.
-                if (TryScreenDirection(_dotSlots[i].offset, out dir))
-                {
-                    position = dir * Mathf.Lerp(style.scentRadiusNear, style.scentRadiusFar, _dotSlots[i].distance);
-                }
-
-                Vector2 lean;
-                if (TryScreenDirection(_dotSlots[i].lean, out lean))
-                {
-                    // 짙어지는 쪽으로 조금 민다. 냄새가 어디서 오는지만 알려 주는 정도로.
-                    position += lean * (style.scentGradientLean * _dotSlots[i].strength);
-                }
-
-                SenseHudBuilder.SetVisible(_dots[i], true);
-                _dotRects[i].anchoredPosition = position;
             }
         }
 
@@ -495,11 +392,11 @@ namespace ByAWhisker.UI
             _arcCount = 0;
         }
 
-        void HideAllDots()
+        /// 수평 거리를 0..1로 바꾼다. 층이 하나뿐이라 높이는 거리로 치지 않는다. NoiseBus와 같은 규칙이다.
+        float Distance01(Vector3 delta)
         {
-            if (_dots == null) return;
-            for (int i = 0; i < _dots.Length; i++) SenseHudBuilder.SetVisible(_dots[i], false);
-            _dotCount = 0;
+            delta.y = 0f;
+            return Mathf.Clamp01(delta.magnitude / Mathf.Max(0.5f, style.arcDistanceRange));
         }
 
         /// 소리를 낸 것이 나 자신인지. 발밑 소리 내는 자식 오브젝트까지 같이 걸러야 한다.

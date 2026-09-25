@@ -25086,6 +25086,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2114994208}
   - component: {fileID: 2114994207}
+  - component: {fileID: 2114994209}
   m_Layer: 0
   m_Name: ScentField
   m_TagString: Untagged
@@ -25108,7 +25109,7 @@ MonoBehaviour:
   updateInterval: 0.2
   wind: {fileID: 11400000, guid: 8eaff3559a124b64e89eb18af6b28787, type: 2}
   depositPerSecond: 2
-  decayPerSecond: 0.35
+  decayPerSecond: 0.12
   spreadPerStep: 0.18
   minStrength: 0.004
   maxActiveCells: 4096
@@ -25132,6 +25133,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 106722270}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2114994209
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2114994206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50c950e843f8def48a0ff1ba99d005df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Senses.ScentMapRenderer
+  field: {fileID: 2114994207}
+  updateInterval: 0.2
+  ageHalfLife: 12
+  ownerColors:
+  - {r: 0.58, g: 0.8, b: 0.62, a: 1}
+  - {r: 0.8, g: 0.63, b: 0.78, a: 1}
+  - {r: 0.84, g: 0.74, b: 0.52, a: 1}
+  - {r: 0.55, g: 0.72, b: 0.88, a: 1}
+  - {r: 0.86, g: 0.56, b: 0.5, a: 1}
 --- !u!1 &2131832952
 GameObject:
   m_ObjectHideFlags: 0
@@ -25417,9 +25439,9 @@ MonoBehaviour:
   lowCover:
     serializedVersion: 2
     m_Bits: 2048
-  coneDegrees: 100
-  radius: 26
-  nearRadius: 2.4
+  coneDegrees: 70
+  radius: 11
+  nearRadius: 3
   rayCount: 96
   updateInterval: 0
 --- !u!114 &3792751515875511885

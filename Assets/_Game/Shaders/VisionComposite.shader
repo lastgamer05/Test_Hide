@@ -10,6 +10,9 @@ Shader "ByAWhisker/VisionComposite"
         _MemoryDesaturation ("Memory Desaturation", Range(0, 1)) = 0.5
         _EdgeSoftness ("Edge Softness", Range(0.001, 0.5)) = 0.15
         _UnseenColor ("Unseen Color", Color) = (0, 0, 0, 1)
+        // 냄새 텍스처는 여기 선언하지 않는다. Properties에 넣으면 같은 이름의 전역 텍스처를
+        // 가려서 전역으로 넣은 지도가 아예 안 들어온다. 숫자만 머티리얼에서 뺀다.
+        _ScentGlow ("Scent Glow", Range(0, 4)) = 1.2
     }
 
     SubShader
@@ -39,12 +42,18 @@ Shader "ByAWhisker/VisionComposite"
             TEXTURE2D(_BW_VisionMemory);
             float4 _BW_VisionBounds;   // (minX, minZ, sizeX, sizeZ)
 
+            // ScentMapRenderer가 전역으로 넣는 값이다.
+            // rgb = 주인 색 x 신선도(갓 남은 것 1, 오래된 것 0), a = 세기 0..1.
+            TEXTURE2D(_BW_ScentMap);
+            float4 _BW_ScentBounds;    // (minX, minZ, sizeX, sizeZ). 시야 범위와 다를 수 있다.
+
             CBUFFER_START(UnityPerMaterial)
                 float _MemoryBrightness;
                 float4 _MemoryTint;
                 float _MemoryDesaturation;
                 float _EdgeSoftness;
                 float4 _UnseenColor;
+                float _ScentGlow;
             CBUFFER_END
 
             half4 CompositeFrag(Varyings input) : SV_Target
@@ -92,6 +101,25 @@ Shader "ByAWhisker/VisionComposite"
 
                 half3 result = lerp(_UnseenColor.rgb, memoryColor, remembered);
                 result = lerp(result, sceneColor.rgb, visible);
+
+                // 자취는 눈이 닿지 않은 곳에서도 떠야 한다. 그게 코를 쓰는 값어치다.
+                // 그래서 visible/remembered로 자르지 않고, 어둡게 만드는 계산이 다 끝난 뒤에 얹는다.
+                if (!isSky)
+                {
+                    // 냄새 격자는 시야 마스크와 범위가 다를 수 있어 UV를 따로 만든다.
+                    float2 scentUV = (worldPos.xz - _BW_ScentBounds.xy) / max(_BW_ScentBounds.zw, 0.0001);
+                    if (all(scentUV == saturate(scentUV)))
+                    {
+                        half4 scent = SAMPLE_TEXTURE2D(_BW_ScentMap, sampler_LinearClamp, scentUV);
+                        half3 trail = scent.rgb * scent.a * _ScentGlow;
+
+                        // 그냥 더하면 밝은 곳에서 하얗게 타서 주인 색이 날아간다.
+                        // 화면이 밝을수록 덜 얹어, 검은 화면(못 본 곳·벽 뒤)에서 가장 또렷하게 뜨게 한다.
+                        // 밝은 곳은 어차피 눈으로 보이니 자취가 약해도 손해가 없다.
+                        half shade = 1.0h - saturate(Luminance(result));
+                        result += trail * shade;
+                    }
+                }
 
                 return half4(result, sceneColor.a);
             }

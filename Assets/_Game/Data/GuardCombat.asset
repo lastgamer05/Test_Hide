@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: GuardCombat
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.GuardCombatSettings
   fireRange: 17
-  aimSeconds: 0.7
+  aimSeconds: 0.15
   recoverSeconds: 0.7
   loseAimSeconds: 0.8

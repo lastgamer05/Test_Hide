@@ -51,6 +51,7 @@ namespace ByAWhisker.Combat
         // 되돌릴 것들. 껐을 때의 값이 아니라 끄기 직전의 값을 적어 둬야 정확히 돌아온다.
         private Collider[] _colliders;
         private bool[] _colliderWasEnabled;
+        private bool[] _colliderWasTrigger;
         private Behaviour[] _behaviours;
         private bool[] _behaviourWasEnabled;
 
@@ -69,6 +70,7 @@ namespace ByAWhisker.Combat
 
             _colliders = GetComponentsInChildren<Collider>(true);
             _colliderWasEnabled = new bool[_colliders.Length];
+            _colliderWasTrigger = new bool[_colliders.Length];
 
             _scent = GetComponentInChildren<ScentSource>(true);
             _brain = GetComponent<GuardBrain>();
@@ -143,6 +145,7 @@ namespace ByAWhisker.Combat
             for (int i = 0; i < _colliders.Length; i++)
             {
                 _colliderWasEnabled[i] = _colliders[i] != null && _colliders[i].enabled;
+                _colliderWasTrigger[i] = _colliders[i] != null && _colliders[i].isTrigger;
             }
 
             for (int i = 0; i < _behaviours.Length; i++)
@@ -166,10 +169,12 @@ namespace ByAWhisker.Combat
 
         private void DisableRemembered()
         {
-            // 총알이 시체를 뚫고 지나가고, 시선도 막히지 않는다. 렌더러는 건드리지 않는다.
+            // 콜라이더는 끄지 않고 트리거로 바꾼다. 꺼 버리면 시체를 물리로 찾을 수 없어서
+            // 경비가 시체를 발견하지도, 플레이어가 시체를 들지도 못한다.
+            // 총알(Weapon)과 시선(Sight)은 둘 다 트리거를 무시하므로, 뚫고 지나가는 성질은 그대로다.
             for (int i = 0; i < _colliders.Length; i++)
             {
-                if (_colliders[i] != null) _colliders[i].enabled = false;
+                if (_colliders[i] != null) _colliders[i].isTrigger = true;
             }
 
             for (int i = 0; i < _behaviours.Length; i++)
@@ -182,7 +187,9 @@ namespace ByAWhisker.Combat
         {
             for (int i = 0; i < _colliders.Length; i++)
             {
-                if (_colliders[i] != null) _colliders[i].enabled = _colliderWasEnabled[i];
+                if (_colliders[i] == null) continue;
+                _colliders[i].enabled = _colliderWasEnabled[i];
+                _colliders[i].isTrigger = _colliderWasTrigger[i];
             }
         }
 

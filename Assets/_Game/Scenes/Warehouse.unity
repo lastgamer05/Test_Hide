@@ -1129,6 +1129,13 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  bodyMask:
+    serializedVersion: 2
+    m_Bits: 12288
+  bodyRange: 12
+  bodyHeight: 0.3
+  bodyScanInterval: 0.2
+  maxBodies: 8
   initialPlayer: {fileID: 0}
   initialExposure: {fileID: 0}
 --- !u!114 &148518681
@@ -2678,6 +2685,13 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  bodyMask:
+    serializedVersion: 2
+    m_Bits: 12288
+  bodyRange: 12
+  bodyHeight: 0.3
+  bodyScanInterval: 0.2
+  maxBodies: 8
   initialPlayer: {fileID: 0}
   initialExposure: {fileID: 0}
 --- !u!114 &314515679
@@ -7655,6 +7669,13 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  bodyMask:
+    serializedVersion: 2
+    m_Bits: 12288
+  bodyRange: 12
+  bodyHeight: 0.3
+  bodyScanInterval: 0.2
+  maxBodies: 8
   initialPlayer: {fileID: 0}
   initialExposure: {fileID: 0}
 --- !u!114 &828106304
@@ -8048,6 +8069,13 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  bodyMask:
+    serializedVersion: 2
+    m_Bits: 12288
+  bodyRange: 12
+  bodyHeight: 0.3
+  bodyScanInterval: 0.2
+  maxBodies: 8
   initialPlayer: {fileID: 0}
   initialExposure: {fileID: 0}
 --- !u!114 &883909887
@@ -9871,6 +9899,13 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  bodyMask:
+    serializedVersion: 2
+    m_Bits: 12288
+  bodyRange: 12
+  bodyHeight: 0.3
+  bodyScanInterval: 0.2
+  maxBodies: 8
   initialPlayer: {fileID: 0}
   initialExposure: {fileID: 0}
 --- !u!114 &1034100560
@@ -15349,6 +15384,13 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  bodyMask:
+    serializedVersion: 2
+    m_Bits: 12288
+  bodyRange: 12
+  bodyHeight: 0.3
+  bodyScanInterval: 0.2
+  maxBodies: 8
   initialPlayer: {fileID: 0}
   initialExposure: {fileID: 0}
 --- !u!114 &1556625622
@@ -19617,6 +19659,13 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  bodyMask:
+    serializedVersion: 2
+    m_Bits: 12288
+  bodyRange: 12
+  bodyHeight: 0.3
+  bodyScanInterval: 0.2
+  maxBodies: 8
   initialPlayer: {fileID: 0}
   initialExposure: {fileID: 0}
 --- !u!114 &2041584594
@@ -20276,6 +20325,13 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  bodyMask:
+    serializedVersion: 2
+    m_Bits: 12288
+  bodyRange: 12
+  bodyHeight: 0.3
+  bodyScanInterval: 0.2
+  maxBodies: 8
   initialPlayer: {fileID: 0}
   initialExposure: {fileID: 0}
 --- !u!114 &2108297461
@@ -20744,6 +20800,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2612988849310483947, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3792751515875511887}
+    - targetCorrespondingSourceObject: {fileID: 2612988849310483947, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3792751515875511892}
   m_SourcePrefab: {fileID: 100100000, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
 --- !u!1 &3792751515875511879 stripped
 GameObject:
@@ -20874,6 +20933,7 @@ MonoBehaviour:
   stance: {fileID: 0}
   weapon: {fileID: 0}
   takedown: {fileID: 0}
+  carry: {fileID: 0}
   muzzleHeight: 1.2
   aimPlaneHeight: 1
   turnToAim: 1
@@ -20937,6 +20997,34 @@ MonoBehaviour:
     m_Bits: 15872
   suppressedNoiseScale: 0.15
   noise: {fileID: 0}
+--- !u!114 &3792751515875511892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3792751515875511879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6551e92b5e5011645af5cde9e8c74709, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.BodyCarry
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 8192
+  range: 2.1
+  scanInterval: 0.1
+  carryDeadBodies: 1
+  carryAnchor: {fileID: 0}
+  carryOffset: {x: 0, y: 1.15, z: -0.85}
+  carryEuler: {x: 90, y: 0, z: 0}
+  dropDistance: 0.9
+  dropHeight: 0.34
+  blockingLayers:
+    serializedVersion: 2
+    m_Bits: 3584
+  dropClearance: 0.35
+  carrySpeedMultiplier: 0.55
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

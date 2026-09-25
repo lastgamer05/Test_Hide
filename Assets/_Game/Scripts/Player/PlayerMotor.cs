@@ -13,6 +13,8 @@ namespace ByAWhisker.Player
         [SerializeField] private MovementSettings settings;
         [SerializeField] private PlayerInputReader input;
         [SerializeField] private PlayerStance stance;
+        [Tooltip("시체를 들면 느려진다. 비우면 같은 오브젝트에서 찾는다.")]
+        [SerializeField] private ByAWhisker.Combat.BodyCarry carry;
         [Tooltip("이동 방향의 기준이 되는 카메라. 비우면 메인 카메라를 쓴다.")]
         [SerializeField] private Camera viewCamera;
         [Tooltip("켜면 이동 방향을 바라본다. 끄면 마우스 쪽을 바라본다. 켜면 제자리 둘러보기와 엄폐 엿보기가 불가능해진다.")]
@@ -41,6 +43,7 @@ namespace ByAWhisker.Player
         {
             _controller = GetComponent<CharacterController>();
             if (viewCamera == null) viewCamera = Camera.main;
+            if (carry == null) carry = GetComponent<ByAWhisker.Combat.BodyCarry>();
         }
 
         private void OnEnable()
@@ -81,6 +84,8 @@ namespace ByAWhisker.Player
             IsRunning = input.RunHeld && !crouching && wish.sqrMagnitude > 0.01f;
 
             float targetSpeed = crouching ? settings.crouchSpeed : (IsRunning ? settings.runSpeed : settings.walkSpeed);
+            // 몸을 메고 있으면 느려진다. 들지 않았으면 배율이 1이라 아무 일도 하지 않는다.
+            if (carry != null) targetSpeed *= carry.SpeedMultiplier;
             Vector3 targetVelocity = wish * targetSpeed;
             _planarVelocity = Vector3.MoveTowards(_planarVelocity, targetVelocity, settings.acceleration * Time.deltaTime);
 

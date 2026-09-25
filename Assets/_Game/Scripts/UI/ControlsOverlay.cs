@@ -27,7 +27,8 @@ namespace ByAWhisker.UI
         [SerializeField] private int titleSize = 20;
         [SerializeField] private int bodySize = 17;
         [SerializeField] private Vector2 margin = new Vector2(28f, 28f);
-        [SerializeField] private Vector2 panelSize = new Vector2(330f, 320f);
+        // 높이는 Lines 한 줄이 늘 때마다 줄 간격(28)만큼 같이 키운다. 안 그러면 마지막 줄이 패널 밖으로 나간다.
+        [SerializeField] private Vector2 panelSize = new Vector2(330f, 348f);
         [SerializeField] private Color panelColor = new Color(0.04f, 0.05f, 0.07f, 0.72f);
         [SerializeField] private Color titleColor = new Color(0.78f, 0.88f, 0.95f, 1f);
         [SerializeField] private Color bodyColor = new Color(0.72f, 0.78f, 0.84f, 0.95f);
@@ -49,6 +50,7 @@ namespace ByAWhisker.UI
             "마우스  조준",
             "좌클릭  사격",
             "R  재장전",
+            "G  시체 들기 / 내려놓기",
             "F  뒤에서 제압",
             "Z / X  카메라 90도 회전",
             "Tab  이 안내 접기"
@@ -228,13 +230,25 @@ namespace ByAWhisker.UI
             string posture = stance != null && stance.IsCrouching ? "앉음" : "섬";
 
             string line = posture;
-            if (weapon != null) line += weapon.IsReloading ? "    재장전 중" : "    탄약 " + weapon.Ammo;
+            if (weapon != null) line += weapon.IsReloading ? "    재장전 중" : "    탄약 " + AmmoText();
 
             // 제압할 수 있는 순간을 알려 준다. 이게 없으면 등 뒤에 섰는지 플레이어가 알 수 없다.
             if (takedown != null && takedown.HasTarget) line = "F  제압 가능\n" + line;
 
             if (Time.time < _flashUntil) line = _flashText + "\n" + line;
             return line;
+        }
+
+        /// <summary>
+        /// 탄창과 예비탄. 예비탄이 무한(음수)이면 숫자를 감춘다. 셀 필요가 없는 수를 띄워 봐야
+        /// 아낄 생각만 흐려진다. 유한할 때만 "6 + 6"처럼 남은 몫을 같이 보여 준다.
+        /// </summary>
+        private string AmmoText()
+        {
+            int reserve = weapon.Reserve;
+            if (reserve < 0) return weapon.Ammo.ToString();
+
+            return weapon.Ammo + " + " + reserve;
         }
 
         private void SetOpen(bool open)

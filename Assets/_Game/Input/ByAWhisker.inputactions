@@ -85,6 +85,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Carry",
+                    "type": "Button",
+                    "id": "7f1a2c40-000a-4a10-9c01-00000000000b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -228,6 +237,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Takedown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7f1a2c40-010c-4a10-9c01-00000000010d",
+                    "path": "<Keyboard>/g",
+                    "interactions": "press",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Carry",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

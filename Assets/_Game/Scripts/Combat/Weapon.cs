@@ -33,11 +33,19 @@ namespace ByAWhisker.Combat
 
         private Transform _selfOwner;
         private int _ammo;
+        private int _reserve;
         private float _reloadLeft;
         private float _nextFireTime;
 
         public WeaponSettings Settings { get { return settings; } }
         public int Ammo { get { return _ammo; } }
+
+        /// <summary>남은 예비탄. 무한이면 설정에 적힌 음수를 그대로 돌려준다.</summary>
+        public int Reserve { get { return _reserve; } }
+
+        /// <summary>장전에 쓸 탄이 남았는가. 무한(음수)은 언제나 남아 있는 것으로 친다.</summary>
+        public bool HasReserve { get { return _reserve != 0; } }
+
         public bool IsReloading { get { return _reloadLeft > 0f; } }
 
         public bool CanFire
@@ -81,7 +89,7 @@ namespace ByAWhisker.Combat
             if (_reloadLeft > 0f) return;
 
             _reloadLeft = 0f;
-            _ammo = settings != null ? Mathf.Max(0, settings.magazine) : 0;
+            FinishReload();
         }
 
         /// <summary>한 발 쏜다. 쏘지 못하는 상태면 false.</summary>
@@ -127,18 +135,48 @@ namespace ByAWhisker.Combat
             if (IsReloading) return;
             if (_ammo >= settings.magazine) return;
 
+            // 넣을 것이 없으면 시작조차 하지 않는다. 헛장전으로 몇 초를 묶어 두면 빈 총보다 더 나쁘다.
+            if (!HasReserve) return;
+
             _reloadLeft = Mathf.Max(0f, settings.reloadSeconds);
 
             // 장전 시간이 0이면 Update를 기다릴 것 없이 바로 채운다. 그래야 0초 설정이 먹통이 안 된다.
-            if (_reloadLeft <= 0f) _ammo = Mathf.Max(0, settings.magazine);
+            if (_reloadLeft <= 0f) FinishReload();
         }
 
-        /// <summary>재시작용. 장전 중이던 것도 없던 일로 하고 꽉 찬 탄창으로 되돌린다.</summary>
+        /// <summary>
+        /// 탄창을 채우고 그만큼 예비탄을 깎는다. 깎는 일을 장전이 끝나는 이 순간까지 미루는 이유는,
+        /// 장전 도중에 죽거나 재시작해도 꺼내던 탄을 손해 보지 않게 하려는 것이다.
+        /// 예비탄이 모자라면 탄창을 다 못 채워도 있는 만큼만 넣는다.
+        /// </summary>
+        private void FinishReload()
+        {
+            if (settings == null) return;
+
+            int magazine = Mathf.Max(0, settings.magazine);
+            int need = magazine - _ammo;
+            if (need <= 0) return;
+
+            // 무한이면 깎을 것이 없다. 경비 총이 여기로 온다.
+            if (_reserve < 0)
+            {
+                _ammo = magazine;
+                return;
+            }
+
+            int taken = Mathf.Min(need, _reserve);
+            _ammo += taken;
+            _reserve -= taken;
+        }
+
+        /// <summary>재시작용. 장전 중이던 것도 없던 일로 하고 탄창과 예비탄을 설정값으로 되돌린다.</summary>
         public void RefillAmmo()
         {
             _reloadLeft = 0f;
             _nextFireTime = 0f;
             _ammo = settings != null ? Mathf.Max(0, settings.magazine) : 0;
+            // 음수는 무한이라는 뜻이라 0으로 다듬지 않고 그대로 받는다.
+            _reserve = settings != null ? settings.reserveAmmo : 0;
         }
 
         /// <summary>

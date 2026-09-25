@@ -14,6 +14,7 @@ namespace ByAWhisker.Player
         [SerializeField] private PlayerStance stance;
         [SerializeField] private Weapon weapon;
         [SerializeField] private TakedownAction takedown;
+        [SerializeField] private BodyCarry carry;
         [Tooltip("총구 높이. 눈보다 조금 아래다.")]
         [SerializeField] private float muzzleHeight = 1.2f;
         [Tooltip("조준 평면의 높이. 발밑에서 이만큼 위다. PlayerMotor가 커서를 볼 때 쓰는 평면과 같아야 몸과 총알이 같은 곳을 본다.")]
@@ -27,6 +28,9 @@ namespace ByAWhisker.Player
         /// <summary>지금 겨누고 있는 수평 방향. 화면 표시나 애니메이션이 읽어 갈 수 있다.</summary>
         public Vector3 AimDirection { get; private set; }
 
+        /// <summary>몸을 들고 있으면 두 손이 막힌다. 쏘지도, 쏘려고 몸을 돌리지도 않는다.</summary>
+        private bool Carrying { get { return carry != null && carry.IsCarrying; } }
+
         private void Awake()
         {
             if (input == null) input = GetComponent<PlayerInputReader>();
@@ -34,6 +38,7 @@ namespace ByAWhisker.Player
             if (stance == null) stance = GetComponent<PlayerStance>();
             if (weapon == null) weapon = GetComponent<Weapon>();
             if (takedown == null) takedown = GetComponent<TakedownAction>();
+            if (carry == null) carry = GetComponent<BodyCarry>();
 
             AimDirection = transform.forward;
         }
@@ -43,6 +48,7 @@ namespace ByAWhisker.Player
             if (input == null) return;
             input.ReloadRequested += OnReload;
             input.TakedownRequested += OnTakedown;
+            input.CarryRequested += OnCarry;
         }
 
         private void OnDisable()
@@ -50,6 +56,7 @@ namespace ByAWhisker.Player
             if (input == null) return;
             input.ReloadRequested -= OnReload;
             input.TakedownRequested -= OnTakedown;
+            input.CarryRequested -= OnCarry;
         }
 
         private void Update()
@@ -58,7 +65,7 @@ namespace ByAWhisker.Player
 
             UpdateAim();
 
-            if (input.FireHeld && weapon != null)
+            if (input.FireHeld && !Carrying && weapon != null)
             {
                 // 연사 간격은 총이 알아서 지킨다. 여기서는 누르고 있다는 것만 전한다.
                 weapon.TryFire(MuzzlePosition(), AimDirection);
@@ -77,7 +84,7 @@ namespace ByAWhisker.Player
             AimDirection = AimSolver.AimDirection(MuzzlePosition(), point, AimDirection);
 
             // 쏘는 동안에만 돌린다. 평소에도 돌리면 이동 방향과 시선이 계속 싸운다.
-            if (turnToAim && input.FireHeld)
+            if (turnToAim && input.FireHeld && !Carrying)
             {
                 transform.rotation = Quaternion.LookRotation(AimDirection, Vector3.up);
             }
@@ -104,6 +111,21 @@ namespace ByAWhisker.Player
             // 실패도 알려 준다. 안 그러면 키가 먹은 건지 자리가 틀린 건지 알 수 없다.
             if (_overlay == null) _overlay = FindAnyObjectByType<ByAWhisker.UI.ControlsOverlay>();
             if (_overlay != null) _overlay.Flash(done ? "제압!" : "등 뒤로 더 가까이");
+        }
+
+        private void OnCarry()
+        {
+            if (carry == null) return;
+
+            bool dropping = carry.IsCarrying;
+            carry.Toggle();
+
+            // 집기도 내려놓기도 한순간에 끝나서 글자가 없으면 키가 먹었는지 알 수 없다.
+            if (_overlay == null) _overlay = FindAnyObjectByType<ByAWhisker.UI.ControlsOverlay>();
+            if (_overlay == null) return;
+
+            if (dropping) _overlay.Flash("내려놓았다");
+            else _overlay.Flash(carry.IsCarrying ? "몸을 들었다" : "쓰러진 몸 쪽으로 더 가까이");
         }
     }
 }

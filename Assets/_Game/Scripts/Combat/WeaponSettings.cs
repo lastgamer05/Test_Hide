@@ -24,6 +24,9 @@ namespace ByAWhisker.Combat
         [Tooltip("탄창 한 개의 발 수.")]
         public int magazine = 6;
 
+        [Tooltip("탄창 밖에 들고 다니는 예비탄. 음수면 무한이라 장전이 끊기지 않는다. 경비 총은 무한을 쓴다.")]
+        public int reserveAmmo = -1;
+
         [Tooltip("장전에 걸리는 시간(초). 이 동안은 쏠 수 없다.")]
         public float reloadSeconds = 1.6f;
 

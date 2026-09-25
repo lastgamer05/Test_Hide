@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ce0a734bada0304c9423a4a51cc4786, type: 3}
   m_Name: PlayerPistol
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.WeaponSettings
-  range: 18
+  range: 11
   spreadDegrees: 2
   fireInterval: 0.45
   magazine: 6
+  reserveAmmo: 6
   reloadSeconds: 1.8
   suppressed: 1
   noiseLoudness: 0.9

@@ -140,6 +140,19 @@ namespace ByAWhisker.AI
                 return;
             }
 
+            // 쓰러진 몸은 소리와 같은 무게의 단서다. 살아 있는 단서를 쫓는 중이면 그쪽이 먼저라
+            // 이 자리에서만 본다. Alert나 Attack을 Search로 끌어내리지도 않는다.
+            if (perception.SeesBody && Current != State.Alert && Current != State.Attack)
+            {
+                // 받아들이는 순간 뒤질 자리가 시체 자리로 바뀐다. 같은 몸에 두 번 놀라지는 않는다.
+                perception.AcknowledgeBody();
+                Enter(State.Search);
+                // 이미 Search 중이었다면 Enter가 아무 일도 하지 않으니 여기서 둘러보기를 다시 시작한다.
+                _stateTimer = 0f;
+                _searchArrived = false;
+                return;
+            }
+
             if (aware >= suspiciousThreshold && Current == State.Patrol) Enter(State.Suspicious);
         }
 
@@ -288,6 +301,7 @@ namespace ByAWhisker.AI
             if (perception != null)
             {
                 perception.enabled = true;
+                // 의심도와 함께, 어느 시체에 이미 놀랐는지도 여기서 지워진다. 시체도 같이 되살아나기 때문이다.
                 perception.ResetAwareness();
             }
 

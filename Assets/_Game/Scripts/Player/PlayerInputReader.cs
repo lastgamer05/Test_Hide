@@ -23,6 +23,7 @@ namespace ByAWhisker.Player
         private InputAction _fire;
         private InputAction _reload;
         private InputAction _takedown;
+        private InputAction _carry;
 
         /// <summary>앉기 전환을 눌렀다.</summary>
         public event Action CrouchToggled;
@@ -35,6 +36,9 @@ namespace ByAWhisker.Player
 
         /// <summary>제압을 눌렀다.</summary>
         public event Action TakedownRequested;
+
+        /// <summary>시체 들기와 내려놓기를 눌렀다. 같은 키가 두 가지를 다 맡아서 어느 쪽인지는 받는 쪽이 정한다.</summary>
+        public event Action CarryRequested;
 
         /// <summary>사격은 누르고 있는 동안 계속 쏠 수 있어야 해서 이벤트가 아니라 상태로 준다.</summary>
         public bool FireHeld { get { return _fire != null && _fire.IsPressed(); } }
@@ -61,6 +65,7 @@ namespace ByAWhisker.Player
             _fire = _map.FindAction("Fire", true);
             _reload = _map.FindAction("Reload", true);
             _takedown = _map.FindAction("Takedown", true);
+            _carry = _map.FindAction("Carry", true);
         }
 
         private void OnEnable()
@@ -72,6 +77,7 @@ namespace ByAWhisker.Player
             _rotateRight.performed += OnRotateRight;
             _reload.performed += OnReload;
             _takedown.performed += OnTakedown;
+            _carry.performed += OnCarry;
             _map.Enable();
         }
 
@@ -84,6 +90,7 @@ namespace ByAWhisker.Player
             _rotateRight.performed -= OnRotateRight;
             _reload.performed -= OnReload;
             _takedown.performed -= OnTakedown;
+            _carry.performed -= OnCarry;
             _map.Disable();
         }
 
@@ -110,6 +117,11 @@ namespace ByAWhisker.Player
         private void OnTakedown(InputAction.CallbackContext context)
         {
             if (TakedownRequested != null) TakedownRequested();
+        }
+
+        private void OnCarry(InputAction.CallbackContext context)
+        {
+            if (CarryRequested != null) CarryRequested();
         }
     }
 }

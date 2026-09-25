@@ -1002,6 +1002,8 @@ GameObject:
   m_Component:
   - component: {fileID: 112738347}
   - component: {fileID: 112738348}
+  - component: {fileID: 112738350}
+  - component: {fileID: 112738349}
   m_Layer: 0
   m_Name: ControlsOverlay
   m_TagString: Untagged
@@ -1052,6 +1054,69 @@ MonoBehaviour:
   sortingOrder: 110
   barLabelOrigin: {x: 36, y: 68}
   barLabelSpacing: 278
+--- !u!114 &112738349
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 112738346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 455f5d8bca12b744095f0c40b5bbef65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.SpottedEdge
+  player: {fileID: 0}
+  viewCamera: {fileID: 0}
+  autoBindOnStart: 1
+  referenceResolution: {x: 1920, y: 1080}
+  sortingOrder: 120
+  maxWedges: 5
+  edgeInset: {x: 230, y: 150}
+  wedgeSize: {x: 78, y: 46}
+  wedgeColor: {r: 1, g: 0.3, b: 0.24, a: 1}
+  wedgeCalmAlpha: 0.34
+  wedgeAlertAlpha: 0.95
+  hideBelow: 0.02
+  vignetteColor: {r: 0.86, g: 0.1, b: 0.08, a: 1}
+  vignetteCalmAlpha: 0.12
+  vignetteAlertAlpha: 0.52
+  vignetteInner: 0.52
+  vignetteOuter: 1.25
+  followSpeed: 7
+--- !u!114 &112738350
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 112738346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8f77986ece286b4891957ebf38f241a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.SpottedFlash
+  viewCamera: {fileID: 0}
+  minInterval: 0.55
+  markHeight: 2.7
+  markSize: 0.85
+  markPopScale: 1.45
+  markSettleScale: 0.95
+  markSeconds: 0.7
+  markRise: 0.22
+  markColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  markRenderQueue: 3100
+  markDepthTest: 0
+  markMaterial: {fileID: 0}
+  flashColor: {r: 1, g: 0.82, b: 0.78, a: 1}
+  flashStrength: 0.35
+  flashInSeconds: 0.04
+  flashOutSeconds: 0.26
+  sortingOrder: 130
+  referenceResolution: {x: 1920, y: 1080}
+  slowScale: 0.35
+  slowSeconds: 0.15
+  normalTimeScale: 1
 --- !u!1 &115772923
 GameObject:
   m_ObjectHideFlags: 0
@@ -1558,6 +1623,10 @@ MonoBehaviour:
   coverTravelTimeout: 4
   coverCooldown: 6
   gunshotHearScale: 1
+  noise: {fileID: 0}
+  shoutLoudness: 1
+  shoutRadius: 12
+  shoutCooldown: 6
 --- !u!114 &148518680
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3362,6 +3431,10 @@ MonoBehaviour:
   coverTravelTimeout: 4
   coverCooldown: 6
   gunshotHearScale: 1
+  noise: {fileID: 0}
+  shoutLoudness: 1
+  shoutRadius: 12
+  shoutCooldown: 6
 --- !u!114 &314515678
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6133,6 +6206,10 @@ MonoBehaviour:
   coverTravelTimeout: 4
   coverCooldown: 6
   gunshotHearScale: 1
+  noise: {fileID: 0}
+  shoutLoudness: 1
+  shoutRadius: 12
+  shoutCooldown: 6
 --- !u!114 &490735484
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8784,6 +8861,10 @@ MonoBehaviour:
   coverTravelTimeout: 4
   coverCooldown: 6
   gunshotHearScale: 1
+  noise: {fileID: 0}
+  shoutLoudness: 1
+  shoutRadius: 12
+  shoutCooldown: 6
 --- !u!114 &700787262
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10239,6 +10320,10 @@ MonoBehaviour:
   coverTravelTimeout: 4
   coverCooldown: 6
   gunshotHearScale: 1
+  noise: {fileID: 0}
+  shoutLoudness: 1
+  shoutRadius: 12
+  shoutCooldown: 6
 --- !u!114 &828106303
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10745,6 +10830,10 @@ MonoBehaviour:
   coverTravelTimeout: 4
   coverCooldown: 6
   gunshotHearScale: 1
+  noise: {fileID: 0}
+  shoutLoudness: 1
+  shoutRadius: 12
+  shoutCooldown: 6
 --- !u!114 &883909886
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12885,6 +12974,10 @@ MonoBehaviour:
   coverTravelTimeout: 4
   coverCooldown: 6
   gunshotHearScale: 1
+  noise: {fileID: 0}
+  shoutLoudness: 1
+  shoutRadius: 12
+  shoutCooldown: 6
 --- !u!114 &1034100559
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18865,6 +18958,10 @@ MonoBehaviour:
   coverTravelTimeout: 4
   coverCooldown: 6
   gunshotHearScale: 1
+  noise: {fileID: 0}
+  shoutLoudness: 1
+  shoutRadius: 12
+  shoutCooldown: 6
 --- !u!114 &1556625621
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19586,6 +19683,10 @@ MonoBehaviour:
   coverTravelTimeout: 4
   coverCooldown: 6
   gunshotHearScale: 1
+  noise: {fileID: 0}
+  shoutLoudness: 1
+  shoutRadius: 12
+  shoutCooldown: 6
 --- !u!114 &1570468241
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23491,6 +23592,10 @@ MonoBehaviour:
   coverTravelTimeout: 4
   coverCooldown: 6
   gunshotHearScale: 1
+  noise: {fileID: 0}
+  shoutLoudness: 1
+  shoutRadius: 12
+  shoutCooldown: 6
 --- !u!114 &1930149981
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24477,6 +24582,10 @@ MonoBehaviour:
   coverTravelTimeout: 4
   coverCooldown: 6
   gunshotHearScale: 1
+  noise: {fileID: 0}
+  shoutLoudness: 1
+  shoutRadius: 12
+  shoutCooldown: 6
 --- !u!114 &2041584593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25219,6 +25328,10 @@ MonoBehaviour:
   coverTravelTimeout: 4
   coverCooldown: 6
   gunshotHearScale: 1
+  noise: {fileID: 0}
+  shoutLoudness: 1
+  shoutRadius: 12
+  shoutCooldown: 6
 --- !u!114 &2108297460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25756,15 +25869,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 417787937945456299, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 5
+      value: 53
       objectReference: {fileID: 0}
     - target: {fileID: 417787937945456299, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.08
       objectReference: {fileID: 0}
     - target: {fileID: 417787937945456299, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 26.6
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 417787937945456299, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
       propertyPath: m_LocalRotation.w
@@ -25797,6 +25910,10 @@ PrefabInstance:
     - target: {fileID: 2612988849310483947, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 4417021980257647177, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4567090932940233233, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
       propertyPath: viewCamera

@@ -54,6 +54,20 @@ namespace ByAWhisker.AI
         [Tooltip("총성이 들리는 거리 배율. 총성은 발소리와 달리 프로필의 약한 귀를 거치지 않고 그대로 듣는다.")]
         [SerializeField] private float gunshotHearScale = 1f;
 
+        [Header("외침")]
+        [Tooltip("소리를 낼 NoiseEmitter. 비우면 같은 오브젝트에서 찾는다.")]
+        [SerializeField] private NoiseEmitter noise;
+
+        [Tooltip("발각을 알리는 외침의 크기. 총성에 준해야 동료가 듣고 온다. 0..1")]
+        [Range(0f, 1f)]
+        [SerializeField] private float shoutLoudness = 1f;
+
+        [Tooltip("NoiseEmitter가 없을 때만 쓰는 반경(m). 붙어 있으면 그쪽의 크기당 반경을 따른다.")]
+        [SerializeField] private float shoutRadius = 12f;
+
+        [Tooltip("한 번 외친 뒤 다시 외치기까지의 최소 간격(초). 없으면 Alert를 들락거릴 때마다 외친다.")]
+        [SerializeField] private float shoutCooldown = 6f;
+
         private Vector3 _spawnPosition;
         private Quaternion _spawnRotation;
 
@@ -69,6 +83,7 @@ namespace ByAWhisker.AI
         private Damageable _body;
         private bool _underFire;      // 이번에 총격을 받았다. 한 프레임짜리 신호라 Update가 소비한다
         private float _coverReadyTime; // 이 시각이 지나야 다시 숨는다
+        private float _shoutReadyTime; // 이 시각이 지나야 다시 외친다
 
         public State Current { get; private set; }
         public event System.Action<State> StateChanged;
@@ -83,6 +98,8 @@ namespace ByAWhisker.AI
             if (perception == null) perception = GetComponent<GuardPerception>();
             if (gunner == null) gunner = GetComponent<GuardGunner>();
             if (cover == null) cover = GetComponent<GuardCover>();
+            // 외침도 발소리와 같은 통로로 낸다. 없으면 Shout이 NoiseBus를 직접 부른다.
+            if (noise == null) noise = GetComponent<NoiseEmitter>();
 
             // 콜라이더가 자식에 달려 있어도 맞은 몸은 부모 하나다.
             _body = GetComponentInParent<Damageable>();
@@ -413,6 +430,8 @@ namespace ByAWhisker.AI
             if (cover != null) cover.Forget();
             _underFire = false;
             _coverReadyTime = 0f;
+            // 지난 판에 외친 것은 없던 일이 된다. 남겨 두면 다시 들킨 첫 순간에 아무도 외치지 않는다.
+            _shoutReadyTime = 0f;
 
             Enter(State.Patrol, true);
         }
@@ -450,6 +469,44 @@ namespace ByAWhisker.AI
             return source.transform.IsChildOf(transform);
         }
 
+        /// <summary>
+        /// 발각을 알리는 외침. NoiseKind는 있는 것 중 Object를 쓴다.
+        /// Gunshot은 안 된다. 위의 HandleNoise가 총성을 "총격을 받았다"로 읽어서, 외침 한 번에
+        /// 사거리 안 동료들이 쏜 사람도 없는데 엄폐물로 뛴다. GuardPerception도 총성만은
+        /// 의심도를 단번에 끝까지 올리므로 동료가 찾지도 않고 바로 발각된 것이 된다.
+        /// Footstep은 SenseHud와 NoiseRipple이 발소리 색으로 칠해서 플레이어에게 거짓말이 된다.
+        /// Bump는 제압당한 몸이 바닥에 닿는 소리로 이미 쓰고 있다.
+        /// Object는 아직 아무도 쓰지 않고, 두 표시 모두 "그 밖의 소리" 색으로 보내며,
+        /// 듣는 쪽에서는 크기만큼 의심도를 올려 동료가 소리 난 자리로 찾아오게 한다. 그게 우리가 원하는 것이다.
+        /// </summary>
+        private void Shout()
+        {
+            if (shoutLoudness <= 0f) return;
+            // 엄폐와 Alert 사이를 오가면 Enter(State.Alert)가 거듭 불린다. 그때마다 외치면
+            // 한 경비가 비명을 연달아 지르고 동료들이 그 자리에 못 박힌다.
+            if (Time.time < _shoutReadyTime) return;
+            _shoutReadyTime = Time.time + shoutCooldown;
+
+            // 붙어 있으면 발소리와 같은 통로를 쓴다. 듣는 쪽이 자기 약한 귀로 똑같이 걸러야
+            // 외침만 유별나게 멀리 가지 않는다. 반경은 그쪽의 크기당 반경이 정한다.
+            if (noise != null)
+            {
+                noise.EmitOnce(shoutLoudness, NoiseKind.Object);
+                return;
+            }
+
+            NoiseEvent evt;
+            evt.position = transform.position;
+            evt.radius = Mathf.Max(0f, shoutRadius);
+            evt.loudness = Mathf.Clamp01(shoutLoudness);
+            evt.kind = NoiseKind.Object;
+            // 주인을 적어 둬야 제 외침을 제가 다시 듣고 놀라지 않는다.
+            evt.source = gameObject;
+            evt.time = Time.time;
+
+            NoiseBus.Emit(evt);
+        }
+
         private void Enter(State next, bool force = false)
         {
             if (!force && Current == next) return;
@@ -483,6 +540,12 @@ namespace ByAWhisker.AI
                 case State.Suspicious:
                 case State.Attack:
                     if (motor != null) motor.Stop();
+                    break;
+
+                case State.Alert:
+                    // 들킨 순간 경비가 소리를 지른다. 화면 효과와 달리 이건 세계 안에서 벌어지는 일이라
+                    // 동료가 실제로 듣고 오고, 플레이어도 집중 중이면 고리로 어디서 났는지 본다.
+                    Shout();
                     break;
 
                 case State.Stunned:

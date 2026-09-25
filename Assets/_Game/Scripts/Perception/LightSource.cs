@@ -15,6 +15,9 @@ namespace ByAWhisker.Perception
         [Tooltip("램프 중심의 밝기. 0..1")]
         [Range(0f, 1f)] public float intensity = 1f;
 
+        [Tooltip("퍼지는 각도(도). 0이면 사방으로 퍼지는 램프, 0보다 크면 앞쪽만 비추는 손전등이다.")]
+        [Range(0f, 180f)] public float coneAngle = 0f;
+
         [Tooltip("시작할 때 켜져 있는가.")]
         [SerializeField] private bool startOn = true;
 
@@ -46,6 +49,26 @@ namespace ByAWhisker.Perception
             _isOn = startOn;
         }
 
+        /// <summary>
+        /// 그 자리가 이 빛의 부채꼴 안에 드는가. 각도가 0이면 사방을 비추므로 언제나 참이다.
+        /// 위아래는 따지지 않는다. 층이 하나뿐이라 수평으로만 보면 된다.
+        /// </summary>
+        public bool Covers(Vector3 worldPosition)
+        {
+            if (coneAngle <= 0f) return true;
+
+            Vector3 to = worldPosition - transform.position;
+            to.y = 0f;
+            if (to.sqrMagnitude < 0.0001f) return true;   // 발밑은 언제나 밝다
+
+            Vector3 forward = transform.forward;
+            forward.y = 0f;
+            if (forward.sqrMagnitude < 0.0001f) return true;
+
+            float half = coneAngle * 0.5f;
+            return Vector3.Angle(forward.normalized, to.normalized) <= half;
+        }
+
         private void OnEnable()
         {
             if (!_all.Contains(this)) _all.Add(this);
@@ -67,7 +90,18 @@ namespace ByAWhisker.Perception
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = new Color(1f, 0.9f, 0.4f, 0.35f);
-            Gizmos.DrawWireSphere(transform.position, radius);
+            if (coneAngle <= 0f)
+            {
+                Gizmos.DrawWireSphere(transform.position, radius);
+                return;
+            }
+
+            // 손전등은 비추는 쪽을 알아야 자리를 잡을 수 있다. 부채꼴의 양 끝과 가운데만 그린다.
+            float half = coneAngle * 0.5f;
+            Vector3 forward = transform.forward;
+            Gizmos.DrawLine(transform.position, transform.position + Quaternion.Euler(0f, -half, 0f) * forward * radius);
+            Gizmos.DrawLine(transform.position, transform.position + Quaternion.Euler(0f, half, 0f) * forward * radius);
+            Gizmos.DrawLine(transform.position, transform.position + forward * radius);
         }
 #endif
     }

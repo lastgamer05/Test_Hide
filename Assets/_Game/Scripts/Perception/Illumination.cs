@@ -39,6 +39,9 @@ namespace ByAWhisker.Perception
                 float value = (1f - Mathf.Sqrt(sqrDistance) / radius) * light.intensity;
                 if (value <= brightest) continue; // 이미 더 밝은 램프가 있으면 레이캐스트를 아낀다.
 
+                // 손전등은 앞쪽만 비춘다. 각도 밖이면 거리 안이어도 어둡다.
+                if (!light.Covers(worldPosition)) continue;
+
                 // 벽 뒤는 어둡다. 부분 그림자는 없이 막히면 0으로 본다.
                 if (!Sight.HasLineOfSight(lightPosition, worldPosition, blockers)) continue;
 

@@ -29,7 +29,8 @@ Material:
     - _EdgeSoftness: 0.15
     - _MemoryBrightness: 0.22
     - _MemoryDesaturation: 0.5
-    - _ScentGlow: 2.5
+    - _ScentGamma: 0.65
+    - _ScentGlow: 1.2
     m_Colors:
     - _MemoryTint: {r: 0.54999995, g: 0.72, b: 1, a: 1}
     - _UnseenColor: {r: 0, g: 0, b: 0, a: 1}

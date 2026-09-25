@@ -8884,6 +8884,8 @@ MonoBehaviour:
   startYaw: 45
   stepDegrees: 90
   rotateSeconds: 0.25
+  focusDistance: 6.5
+  focusFieldOfView: 38
   lookAhead: 0.8
   focusHeight: 1
   followLerp: 6
@@ -25087,6 +25089,7 @@ GameObject:
   - component: {fileID: 2114994208}
   - component: {fileID: 2114994207}
   - component: {fileID: 2114994209}
+  - component: {fileID: 2114994210}
   m_Layer: 0
   m_Name: ScentField
   m_TagString: Untagged
@@ -25154,6 +25157,34 @@ MonoBehaviour:
   - {r: 0.84, g: 0.74, b: 0.52, a: 1}
   - {r: 0.55, g: 0.72, b: 0.88, a: 1}
   - {r: 0.86, g: 0.56, b: 0.5, a: 1}
+--- !u!114 &2114994210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2114994206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acc7ad1d610c90c47bf2dff8becf7616, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Senses.NoiseRipple
+  expandSeconds: 0.8
+  startRadius: 0.35
+  expandEase: 2.2
+  segments: 48
+  startWidth: 0.16
+  endWidth: 0.04
+  groundOffset: 0.05
+  footstepColor: {r: 0.55, g: 0.78, b: 0.85, a: 0.85}
+  gunshotColor: {r: 0.95, g: 0.42, b: 0.3, a: 1}
+  otherColor: {r: 0.86, g: 0.78, b: 0.48, a: 0.9}
+  quietAlpha: 0.4
+  maxRipples: 16
+  showOwnNoise: 1
+  player: {fileID: 0}
+  lineMaterial: {fileID: 0}
+  renderQueue: 3100
 --- !u!1 &2131832952
 GameObject:
   m_ObjectHideFlags: 0
@@ -25364,6 +25395,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2612988849310483947, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3792751515875511892}
+    - targetCorrespondingSourceObject: {fileID: 2612988849310483947, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3792751515875511893}
   m_SourcePrefab: {fileID: 100100000, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
 --- !u!1 &3792751515875511879 stripped
 GameObject:
@@ -25589,6 +25623,22 @@ MonoBehaviour:
     m_Bits: 3584
   dropClearance: 0.35
   carrySpeedMultiplier: 0.55
+--- !u!114 &3792751515875511893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3792751515875511879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f52abd33298aa74ca16389e80548138, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Player.FocusSense
+  input: {fileID: 167065364}
+  view: {fileID: 702343078}
+  enterSpeed: 10
+  exitSpeed: 4
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

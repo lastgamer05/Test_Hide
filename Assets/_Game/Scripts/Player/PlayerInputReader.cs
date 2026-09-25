@@ -24,6 +24,7 @@ namespace ByAWhisker.Player
         private InputAction _reload;
         private InputAction _takedown;
         private InputAction _carry;
+        private InputAction _focus;
 
         /// <summary>앉기 전환을 눌렀다.</summary>
         public event Action CrouchToggled;
@@ -42,6 +43,9 @@ namespace ByAWhisker.Player
 
         /// <summary>사격은 누르고 있는 동안 계속 쏠 수 있어야 해서 이벤트가 아니라 상태로 준다.</summary>
         public bool FireHeld { get { return _fire != null && _fire.IsPressed(); } }
+
+        /// <summary>집중은 누르고 있는 동안만 이어진다. 사격과 같은 이유로 이벤트가 아니라 상태다.</summary>
+        public bool FocusHeld { get { return _focus != null && _focus.IsPressed(); } }
 
         public Vector2 Move { get { return _move != null ? _move.ReadValue<Vector2>() : Vector2.zero; } }
         public bool RunHeld { get { return _run != null && _run.IsPressed(); } }
@@ -66,6 +70,7 @@ namespace ByAWhisker.Player
             _reload = _map.FindAction("Reload", true);
             _takedown = _map.FindAction("Takedown", true);
             _carry = _map.FindAction("Carry", true);
+            _focus = _map.FindAction("Focus", true);
         }
 
         private void OnEnable()

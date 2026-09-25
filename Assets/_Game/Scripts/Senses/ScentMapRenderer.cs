@@ -37,7 +37,10 @@ namespace ByAWhisker.Senses
 
         [Header("색")]
         [Tooltip("이 초만큼 묵으면 밝기가 절반이 된다. 새 자취와 옛 자취를 가르는 것이 이 값 하나다.")]
-        [SerializeField] private float ageHalfLife = 12f;
+        // 자취는 25초쯤 남는데 반감기가 12초면 끝이 1/4도 안 남아 꼬리가 먼저 검어진다.
+        // 그러면 자취가 사라지기 전에 "어느 쪽으로 갔는가"부터 사라져서, 남은 칸이 길이만 알려 준다.
+        // 수명의 8할쯤으로 잡으면 가장 오래된 끝도 4할 남짓으로 버티면서 머리와는 두 배 넘게 벌어진다.
+        [SerializeField] private float ageHalfLife = 20f;
 
         [Tooltip("주인별 색. 개체가 팔레트보다 많으면 돌려 쓴다. SenseHudStyle의 점 색과 맞춰 두면 둘이 같은 것으로 읽힌다.")]
         [SerializeField] private Color[] ownerColors = DefaultOwnerColors();

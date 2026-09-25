@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: VisionComposite
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FullScreenPassRendererFeature
   m_Active: 1
-  injectionPoint: 550
+  injectionPoint: 450
   fetchColorBuffer: 1
   requirements: 1
   passMaterial: {fileID: 2100000, guid: 50dcf9b5228234341b02fc6eb1bb0aa4, type: 2}

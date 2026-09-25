@@ -24,9 +24,18 @@ namespace ByAWhisker.Cameras
         [SerializeField] private float stepDegrees = 90f;
         [SerializeField] private float rotateSeconds = 0.25f;
 
+        [Header("집중")]
+        // 아래 둘은 Q를 누르는 "집중 상태"에 쓰는 값이다. 따라가기의 focusHeight와 이름만 닮았지
+        // 하는 일이 다르다. 그쪽은 카메라가 바라보는 점의 높이고, 집중과는 아무 관계가 없다.
+        [Tooltip("집중했을 때 다가갈 거리. 평소 distance와 이 값 사이를 SetFocus가 섞는다.")]
+        [SerializeField] private float focusDistance = 6.5f;
+        [Tooltip("집중했을 때 좁아질 시야각. 평소 fieldOfView와 이 값 사이를 섞는다.")]
+        [SerializeField] private float focusFieldOfView = 38f;
+
         [Header("따라가기")]
         [Tooltip("이동 방향으로 초점을 당기는 거리")]
         [SerializeField] private float lookAhead = 2f;
+        [Tooltip("카메라가 바라보는 점의 높이. 발밑이 아니라 몸통을 본다. 위 '집중' 값들과는 무관하다.")]
         [SerializeField] private float focusHeight = 1f;
         [Tooltip("초점을 따라가는 속도. 낮을수록 부드럽다")]
         [SerializeField] private float followLerp = 5f;
@@ -45,6 +54,9 @@ namespace ByAWhisker.Cameras
         private float _fromYaw;
         private float _targetYaw;
         private float _rotateTimer = -1f;
+
+        // 지금 집중 정도. 0..1. FocusSense가 매 프레임 넣어 준다.
+        private float _focusAmount;
 
         /// <summary>지금 카메라의 수평 각도. 이동이 화면 기준 방향을 구할 때 쓴다.</summary>
         public float Yaw { get { return _currentYaw; } }
@@ -93,6 +105,15 @@ namespace ByAWhisker.Cameras
             if (motor == null) motor = target.GetComponent<PlayerMotor>();
             _leadDirection = Flatten(target.forward);
             SnapToTarget();
+        }
+
+        /// <summary>
+        /// 집중 정도를 받는다. 0은 평소, 1은 끝까지 집중. 보간은 넣어 주는 쪽이 이미 해 뒀다.
+        /// 회전과 마찬가지로 카메라는 입력을 스스로 읽지 않는다 — 여기서는 값을 섞기만 한다.
+        /// </summary>
+        public void SetFocus(float amount)
+        {
+            _focusAmount = Mathf.Clamp01(amount);
         }
 
         /// <summary>한 칸 돌린다. -1은 왼쪽, +1은 오른쪽.</summary>
@@ -194,7 +215,11 @@ namespace ByAWhisker.Cameras
         {
             Quaternion rotation = Quaternion.Euler(pitch, _currentYaw, 0f);
             transform.rotation = rotation;
-            transform.position = _focus - rotation * Vector3.forward * distance;
+            transform.position = _focus - rotation * Vector3.forward * Mathf.Lerp(distance, focusDistance, _focusAmount);
+
+            // 시야각도 같은 자리에서 매 프레임 넣는다. 집중이 풀리는 동안에도 값이 계속 움직이는데,
+            // 거리만 따라 움직이면 다가서는 느낌과 좁아지는 느낌이 어긋난다.
+            if (_camera != null) _camera.fieldOfView = Mathf.Lerp(fieldOfView, focusFieldOfView, _focusAmount);
         }
     }
 }

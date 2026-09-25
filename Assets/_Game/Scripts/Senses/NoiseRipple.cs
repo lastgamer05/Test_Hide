@@ -62,6 +62,20 @@ namespace ByAWhisker.Senses
         [Range(1, 64)]
         [SerializeField] private int maxRipples = 16;
 
+        [Header("집중")]
+        [Tooltip("집중하고 있을 때만 고리를 띄운다. 늘 보이면 화면이 고리로 덮여 아무 정보가 없는 것과 같다.")]
+        [SerializeField] private bool requireFocus = true;
+        [Tooltip("집중 상태를 읽을 쪽. 비우면 씬에서 한 번 찾는다.")]
+        [SerializeField] private ByAWhisker.Player.FocusSense focus;
+
+        [Header("솎아내기")]
+        [Tooltip("이보다 작은 소리는 고리를 만들지 않는다. 발소리마다 고리가 뜨면 너무 잦다.")]
+        [Range(0f, 1f)]
+        [SerializeField] private float minLoudness = 0.35f;
+        [Tooltip("이 거리 안에서 이 시간 안에 난 소리는 하나로 친다. 같은 자리에서 걷는 발소리가 겹겹이 쌓이지 않게 한다.")]
+        [SerializeField] private float mergeRadius = 2.5f;
+        [SerializeField] private float mergeSeconds = 0.5f;
+
         [Header("내 소리")]
         [Tooltip(
             "플레이어 자신이 낸 소리도 고리로 보일지. 기본은 켠다 — 내가 지금 얼마나 멀리까지 들리는지가 " +
@@ -104,6 +118,9 @@ namespace ByAWhisker.Senses
 
         // 다음에 쓸 자리. 순서대로만 나눠 주므로 여기가 곧 가장 오래된 고리다.
         private int _next;
+
+        // 이번 프레임의 집중 세기. 매 프레임 한 번만 읽어 고리마다 다시 묻지 않는다.
+        private float _focusFade = 1f;
 
         private int _activeCount;
         private GameObject _playerRoot;
@@ -178,7 +195,25 @@ namespace ByAWhisker.Senses
         {
             if (_slots == null) return;
             if (evt.radius <= 0.01f) return;
+            if (evt.loudness < minLoudness) return;
             if (!showOwnNoise && IsOwnSource(evt.source)) return;
+
+            // 집중하지 않으면 자리조차 잡지 않는다. 집중을 켜는 순간 지난 소리가 한꺼번에
+            // 떠오르면 어디가 방금 난 소리인지 알 수 없다.
+            if (requireFocus && FocusAmount() <= 0.001f) return;
+
+            // 같은 자리에서 방금 난 소리는 하나로 친다. 걸어가는 발소리가 한 발짝마다 고리를 만들면
+            // 화면이 고리로 덮여서 정작 총성 하나를 놓친다.
+            float now = evt.time > 0f ? evt.time : Time.time;
+            for (int i = 0; i < _slots.Length; i++)
+            {
+                if (!_slots[i].active) continue;
+                if (now - _slots[i].startTime > mergeSeconds) continue;
+
+                Vector3 d = _slots[i].center - evt.position;
+                d.y = 0f;
+                if (d.sqrMagnitude <= mergeRadius * mergeRadius) return;
+            }
 
             int index = _next;
             _next = (_next + 1) % _slots.Length;
@@ -204,6 +239,15 @@ namespace ByAWhisker.Senses
 
             float now = Time.time;
             float life = Mathf.Max(0.05f, expandSeconds);
+
+            // 집중을 놓으면 퍼지던 고리도 같이 잦아든다. 손을 뗐는데 고리만 남아 있으면
+            // 무엇이 집중의 결과인지 읽히지 않는다.
+            _focusFade = requireFocus ? FocusAmount() : 1f;
+            if (_focusFade <= 0.001f)
+            {
+                ClearAll();
+                return;
+            }
 
             for (int i = 0; i < _slots.Length; i++)
             {
@@ -245,7 +289,7 @@ namespace ByAWhisker.Senses
 
             Color color = _slots[index].color;
             // 끝에서 뚝 끊기지 않게 투명도를 t로 눌러 준다. 굵기까지 같이 얇아져야 잦아드는 것으로 읽힌다.
-            color.a *= 1f - t;
+            color.a *= (1f - t) * _focusFade;
 
             // 머티리얼 색이 아니라 정점 색을 바꾼다. 머티리얼을 건드리면 고리마다 사본이 하나씩 생긴다.
             line.startColor = color;
@@ -253,6 +297,13 @@ namespace ByAWhisker.Senses
             line.widthMultiplier = Mathf.Lerp(startWidth, endWidth, t);
 
             Show(index, true);
+        }
+
+        /// <summary>집중 세기. 참조가 없으면 늘 켜진 것으로 본다.</summary>
+        private float FocusAmount()
+        {
+            if (focus == null) focus = Object.FindFirstObjectByType<ByAWhisker.Player.FocusSense>();
+            return focus != null ? focus.Amount : 1f;
         }
 
         private Color ColorFor(NoiseKind kind, float loudness)

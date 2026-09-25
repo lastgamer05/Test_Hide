@@ -8884,8 +8884,8 @@ MonoBehaviour:
   startYaw: 45
   stepDegrees: 90
   rotateSeconds: 0.25
-  focusDistance: 6.5
-  focusFieldOfView: 38
+  focusDistance: 8.6
+  focusFieldOfView: 42
   lookAhead: 0.8
   focusHeight: 1
   followLerp: 6
@@ -25181,6 +25181,11 @@ MonoBehaviour:
   otherColor: {r: 0.86, g: 0.78, b: 0.48, a: 0.9}
   quietAlpha: 0.4
   maxRipples: 16
+  requireFocus: 1
+  focus: {fileID: 3792751515875511893}
+  minLoudness: 0.35
+  mergeRadius: 2.5
+  mergeSeconds: 0.5
   showOwnNoise: 1
   player: {fileID: 0}
   lineMaterial: {fileID: 0}

@@ -1330,6 +1330,7 @@ GameObject:
   - component: {fileID: 148518671}
   - component: {fileID: 148518670}
   - component: {fileID: 148518683}
+  - component: {fileID: 148518684}
   m_Layer: 13
   m_Name: Guard_8
   m_TagString: Untagged
@@ -1580,6 +1581,12 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  nearbyRadius: 3
+  nearbyPerSecond: 1.2
+  nearbyCrouchScale: 0.45
+  nearbyQuietScale: 0.4
+  nearbyMaxAwareness: 0.55
+  nearbyClueFollowSpeed: 2
   gunshotAwareness: 0.9
   allyAlertRadius: 14
   allyAlertPerSecond: 0.5
@@ -1655,6 +1662,36 @@ MonoBehaviour:
   threatHeight: 1.4
   navSampleRadius: 1
   arriveRadius: 0.8
+--- !u!114 &148518684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 148518668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d11e1ff0e1f56845b6330eb1e4fd7f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.AwarenessGauge
+  perception: {fileID: 0}
+  body: {fileID: 0}
+  viewCamera: {fileID: 0}
+  heightOffset: 2.1
+  anchor: {fileID: 0}
+  sweepDegrees: 360
+  innerRadius: 0.22
+  outerRadius: 0.35
+  segments: 48
+  calmColor: {r: 0.86, g: 0.9, b: 0.94, a: 0.35}
+  warnColor: {r: 1, g: 0.84, b: 0.3, a: 0.8}
+  alertColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  warnThreshold: 0.3
+  alertThreshold: 0.6
+  hideBelow: 0.02
+  gaugeMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &149230078
 GameObject:
   m_ObjectHideFlags: 0
@@ -3097,6 +3134,7 @@ GameObject:
   - component: {fileID: 314515669}
   - component: {fileID: 314515668}
   - component: {fileID: 314515681}
+  - component: {fileID: 314515682}
   m_Layer: 13
   m_Name: Guard_5
   m_TagString: Untagged
@@ -3347,6 +3385,12 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  nearbyRadius: 3
+  nearbyPerSecond: 1.2
+  nearbyCrouchScale: 0.45
+  nearbyQuietScale: 0.4
+  nearbyMaxAwareness: 0.55
+  nearbyClueFollowSpeed: 2
   gunshotAwareness: 0.9
   allyAlertRadius: 14
   allyAlertPerSecond: 0.5
@@ -3422,6 +3466,36 @@ MonoBehaviour:
   threatHeight: 1.4
   navSampleRadius: 1
   arriveRadius: 0.8
+--- !u!114 &314515682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 314515666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d11e1ff0e1f56845b6330eb1e4fd7f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.AwarenessGauge
+  perception: {fileID: 0}
+  body: {fileID: 0}
+  viewCamera: {fileID: 0}
+  heightOffset: 2.1
+  anchor: {fileID: 0}
+  sweepDegrees: 360
+  innerRadius: 0.22
+  outerRadius: 0.35
+  segments: 48
+  calmColor: {r: 0.86, g: 0.9, b: 0.94, a: 0.35}
+  warnColor: {r: 1, g: 0.84, b: 0.3, a: 0.8}
+  alertColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  warnThreshold: 0.3
+  alertThreshold: 0.6
+  hideBelow: 0.02
+  gaugeMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &329014878
 GameObject:
   m_ObjectHideFlags: 0
@@ -5831,6 +5905,7 @@ GameObject:
   - component: {fileID: 490735475}
   - component: {fileID: 490735474}
   - component: {fileID: 490735487}
+  - component: {fileID: 490735488}
   m_Layer: 13
   m_Name: Guard_9
   m_TagString: Untagged
@@ -6081,6 +6156,12 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  nearbyRadius: 3
+  nearbyPerSecond: 1.2
+  nearbyCrouchScale: 0.45
+  nearbyQuietScale: 0.4
+  nearbyMaxAwareness: 0.55
+  nearbyClueFollowSpeed: 2
   gunshotAwareness: 0.9
   allyAlertRadius: 14
   allyAlertPerSecond: 0.5
@@ -6156,6 +6237,36 @@ MonoBehaviour:
   threatHeight: 1.4
   navSampleRadius: 1
   arriveRadius: 0.8
+--- !u!114 &490735488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 490735472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d11e1ff0e1f56845b6330eb1e4fd7f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.AwarenessGauge
+  perception: {fileID: 0}
+  body: {fileID: 0}
+  viewCamera: {fileID: 0}
+  heightOffset: 2.1
+  anchor: {fileID: 0}
+  sweepDegrees: 360
+  innerRadius: 0.22
+  outerRadius: 0.35
+  segments: 48
+  calmColor: {r: 0.86, g: 0.9, b: 0.94, a: 0.35}
+  warnColor: {r: 1, g: 0.84, b: 0.3, a: 0.8}
+  alertColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  warnThreshold: 0.3
+  alertThreshold: 0.6
+  hideBelow: 0.02
+  gaugeMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &492053097
 GameObject:
   m_ObjectHideFlags: 0
@@ -8445,6 +8556,7 @@ GameObject:
   - component: {fileID: 700787253}
   - component: {fileID: 700787252}
   - component: {fileID: 700787265}
+  - component: {fileID: 700787266}
   m_Layer: 13
   m_Name: Guard_11
   m_TagString: Untagged
@@ -8695,6 +8807,12 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  nearbyRadius: 3
+  nearbyPerSecond: 1.2
+  nearbyCrouchScale: 0.45
+  nearbyQuietScale: 0.4
+  nearbyMaxAwareness: 0.55
+  nearbyClueFollowSpeed: 2
   gunshotAwareness: 0.9
   allyAlertRadius: 14
   allyAlertPerSecond: 0.5
@@ -8770,6 +8888,36 @@ MonoBehaviour:
   threatHeight: 1.4
   navSampleRadius: 1
   arriveRadius: 0.8
+--- !u!114 &700787266
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700787250}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d11e1ff0e1f56845b6330eb1e4fd7f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.AwarenessGauge
+  perception: {fileID: 0}
+  body: {fileID: 0}
+  viewCamera: {fileID: 0}
+  heightOffset: 2.1
+  anchor: {fileID: 0}
+  sweepDegrees: 360
+  innerRadius: 0.22
+  outerRadius: 0.35
+  segments: 48
+  calmColor: {r: 0.86, g: 0.9, b: 0.94, a: 0.35}
+  warnColor: {r: 1, g: 0.84, b: 0.3, a: 0.8}
+  alertColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  warnThreshold: 0.3
+  alertThreshold: 0.6
+  hideBelow: 0.02
+  gaugeMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &702343074
 GameObject:
   m_ObjectHideFlags: 0
@@ -9863,6 +10011,7 @@ GameObject:
   - component: {fileID: 828106294}
   - component: {fileID: 828106293}
   - component: {fileID: 828106306}
+  - component: {fileID: 828106307}
   m_Layer: 13
   m_Name: Guard_7
   m_TagString: Untagged
@@ -10113,6 +10262,12 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  nearbyRadius: 3
+  nearbyPerSecond: 1.2
+  nearbyCrouchScale: 0.45
+  nearbyQuietScale: 0.4
+  nearbyMaxAwareness: 0.55
+  nearbyClueFollowSpeed: 2
   gunshotAwareness: 0.9
   allyAlertRadius: 14
   allyAlertPerSecond: 0.5
@@ -10188,6 +10343,36 @@ MonoBehaviour:
   threatHeight: 1.4
   navSampleRadius: 1
   arriveRadius: 0.8
+--- !u!114 &828106307
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 828106291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d11e1ff0e1f56845b6330eb1e4fd7f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.AwarenessGauge
+  perception: {fileID: 0}
+  body: {fileID: 0}
+  viewCamera: {fileID: 0}
+  heightOffset: 2.1
+  anchor: {fileID: 0}
+  sweepDegrees: 360
+  innerRadius: 0.22
+  outerRadius: 0.35
+  segments: 48
+  calmColor: {r: 0.86, g: 0.9, b: 0.94, a: 0.35}
+  warnColor: {r: 1, g: 0.84, b: 0.3, a: 0.8}
+  alertColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  warnThreshold: 0.3
+  alertThreshold: 0.6
+  hideBelow: 0.02
+  gaugeMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &870050597
 GameObject:
   m_ObjectHideFlags: 0
@@ -10332,6 +10517,7 @@ GameObject:
   - component: {fileID: 883909877}
   - component: {fileID: 883909876}
   - component: {fileID: 883909889}
+  - component: {fileID: 883909890}
   m_Layer: 13
   m_Name: Guard_4
   m_TagString: Untagged
@@ -10582,6 +10768,12 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  nearbyRadius: 3
+  nearbyPerSecond: 1.2
+  nearbyCrouchScale: 0.45
+  nearbyQuietScale: 0.4
+  nearbyMaxAwareness: 0.55
+  nearbyClueFollowSpeed: 2
   gunshotAwareness: 0.9
   allyAlertRadius: 14
   allyAlertPerSecond: 0.5
@@ -10657,6 +10849,36 @@ MonoBehaviour:
   threatHeight: 1.4
   navSampleRadius: 1
   arriveRadius: 0.8
+--- !u!114 &883909890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 883909874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d11e1ff0e1f56845b6330eb1e4fd7f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.AwarenessGauge
+  perception: {fileID: 0}
+  body: {fileID: 0}
+  viewCamera: {fileID: 0}
+  heightOffset: 2.1
+  anchor: {fileID: 0}
+  sweepDegrees: 360
+  innerRadius: 0.22
+  outerRadius: 0.35
+  segments: 48
+  calmColor: {r: 0.86, g: 0.9, b: 0.94, a: 0.35}
+  warnColor: {r: 1, g: 0.84, b: 0.3, a: 0.8}
+  alertColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  warnThreshold: 0.3
+  alertThreshold: 0.6
+  hideBelow: 0.02
+  gaugeMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &903834324
 GameObject:
   m_ObjectHideFlags: 0
@@ -12604,6 +12826,7 @@ GameObject:
   - component: {fileID: 1034100569}
   - component: {fileID: 1034100570}
   - component: {fileID: 1034100571}
+  - component: {fileID: 1034100572}
   m_Layer: 13
   m_Name: Guard_3
   m_TagString: Untagged
@@ -12685,6 +12908,12 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  nearbyRadius: 3
+  nearbyPerSecond: 1.2
+  nearbyCrouchScale: 0.45
+  nearbyQuietScale: 0.4
+  nearbyMaxAwareness: 0.55
+  nearbyClueFollowSpeed: 2
   gunshotAwareness: 0.9
   allyAlertRadius: 14
   allyAlertPerSecond: 0.5
@@ -12929,6 +13158,36 @@ MonoBehaviour:
   threatHeight: 1.4
   navSampleRadius: 1
   arriveRadius: 0.8
+--- !u!114 &1034100572
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034100556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d11e1ff0e1f56845b6330eb1e4fd7f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.AwarenessGauge
+  perception: {fileID: 0}
+  body: {fileID: 0}
+  viewCamera: {fileID: 0}
+  heightOffset: 2.1
+  anchor: {fileID: 0}
+  sweepDegrees: 360
+  innerRadius: 0.22
+  outerRadius: 0.35
+  segments: 48
+  calmColor: {r: 0.86, g: 0.9, b: 0.94, a: 0.35}
+  warnColor: {r: 1, g: 0.84, b: 0.3, a: 0.8}
+  alertColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  warnThreshold: 0.3
+  alertThreshold: 0.6
+  hideBelow: 0.02
+  gaugeMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &1039596464
 GameObject:
   m_ObjectHideFlags: 0
@@ -18378,6 +18637,7 @@ GameObject:
   - component: {fileID: 1556625612}
   - component: {fileID: 1556625611}
   - component: {fileID: 1556625624}
+  - component: {fileID: 1556625625}
   m_Layer: 13
   m_Name: Guard_6
   m_TagString: Untagged
@@ -18628,6 +18888,12 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  nearbyRadius: 3
+  nearbyPerSecond: 1.2
+  nearbyCrouchScale: 0.45
+  nearbyQuietScale: 0.4
+  nearbyMaxAwareness: 0.55
+  nearbyClueFollowSpeed: 2
   gunshotAwareness: 0.9
   allyAlertRadius: 14
   allyAlertPerSecond: 0.5
@@ -18703,6 +18969,36 @@ MonoBehaviour:
   threatHeight: 1.4
   navSampleRadius: 1
   arriveRadius: 0.8
+--- !u!114 &1556625625
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1556625609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d11e1ff0e1f56845b6330eb1e4fd7f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.AwarenessGauge
+  perception: {fileID: 0}
+  body: {fileID: 0}
+  viewCamera: {fileID: 0}
+  heightOffset: 2.1
+  anchor: {fileID: 0}
+  sweepDegrees: 360
+  innerRadius: 0.22
+  outerRadius: 0.35
+  segments: 48
+  calmColor: {r: 0.86, g: 0.9, b: 0.94, a: 0.35}
+  warnColor: {r: 1, g: 0.84, b: 0.3, a: 0.8}
+  alertColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  warnThreshold: 0.3
+  alertThreshold: 0.6
+  hideBelow: 0.02
+  gaugeMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &1557689682
 GameObject:
   m_ObjectHideFlags: 0
@@ -19062,6 +19358,7 @@ GameObject:
   - component: {fileID: 1570468232}
   - component: {fileID: 1570468231}
   - component: {fileID: 1570468244}
+  - component: {fileID: 1570468245}
   m_Layer: 13
   m_Name: Guard_12
   m_TagString: Untagged
@@ -19312,6 +19609,12 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  nearbyRadius: 3
+  nearbyPerSecond: 1.2
+  nearbyCrouchScale: 0.45
+  nearbyQuietScale: 0.4
+  nearbyMaxAwareness: 0.55
+  nearbyClueFollowSpeed: 2
   gunshotAwareness: 0.9
   allyAlertRadius: 14
   allyAlertPerSecond: 0.5
@@ -19387,6 +19690,36 @@ MonoBehaviour:
   threatHeight: 1.4
   navSampleRadius: 1
   arriveRadius: 0.8
+--- !u!114 &1570468245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1570468229}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d11e1ff0e1f56845b6330eb1e4fd7f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.AwarenessGauge
+  perception: {fileID: 0}
+  body: {fileID: 0}
+  viewCamera: {fileID: 0}
+  heightOffset: 2.1
+  anchor: {fileID: 0}
+  sweepDegrees: 360
+  innerRadius: 0.22
+  outerRadius: 0.35
+  segments: 48
+  calmColor: {r: 0.86, g: 0.9, b: 0.94, a: 0.35}
+  warnColor: {r: 1, g: 0.84, b: 0.3, a: 0.8}
+  alertColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  warnThreshold: 0.3
+  alertThreshold: 0.6
+  hideBelow: 0.02
+  gaugeMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &1572849352
 GameObject:
   m_ObjectHideFlags: 0
@@ -22930,6 +23263,7 @@ GameObject:
   - component: {fileID: 1930149972}
   - component: {fileID: 1930149971}
   - component: {fileID: 1930149984}
+  - component: {fileID: 1930149985}
   m_Layer: 13
   m_Name: Guard_10
   m_TagString: Untagged
@@ -23180,6 +23514,12 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  nearbyRadius: 3
+  nearbyPerSecond: 1.2
+  nearbyCrouchScale: 0.45
+  nearbyQuietScale: 0.4
+  nearbyMaxAwareness: 0.55
+  nearbyClueFollowSpeed: 2
   gunshotAwareness: 0.9
   allyAlertRadius: 14
   allyAlertPerSecond: 0.5
@@ -23255,6 +23595,36 @@ MonoBehaviour:
   threatHeight: 1.4
   navSampleRadius: 1
   arriveRadius: 0.8
+--- !u!114 &1930149985
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1930149969}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d11e1ff0e1f56845b6330eb1e4fd7f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.AwarenessGauge
+  perception: {fileID: 0}
+  body: {fileID: 0}
+  viewCamera: {fileID: 0}
+  heightOffset: 2.1
+  anchor: {fileID: 0}
+  sweepDegrees: 360
+  innerRadius: 0.22
+  outerRadius: 0.35
+  segments: 48
+  calmColor: {r: 0.86, g: 0.9, b: 0.94, a: 0.35}
+  warnColor: {r: 1, g: 0.84, b: 0.3, a: 0.8}
+  alertColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  warnThreshold: 0.3
+  alertThreshold: 0.6
+  hideBelow: 0.02
+  gaugeMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &1931666768
 GameObject:
   m_ObjectHideFlags: 0
@@ -24048,6 +24418,7 @@ GameObject:
   - component: {fileID: 2041584603}
   - component: {fileID: 2041584604}
   - component: {fileID: 2041584605}
+  - component: {fileID: 2041584606}
   m_Layer: 13
   m_Name: Guard_2
   m_TagString: Untagged
@@ -24129,6 +24500,12 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  nearbyRadius: 3
+  nearbyPerSecond: 1.2
+  nearbyCrouchScale: 0.45
+  nearbyQuietScale: 0.4
+  nearbyMaxAwareness: 0.55
+  nearbyClueFollowSpeed: 2
   gunshotAwareness: 0.9
   allyAlertRadius: 14
   allyAlertPerSecond: 0.5
@@ -24373,6 +24750,36 @@ MonoBehaviour:
   threatHeight: 1.4
   navSampleRadius: 1
   arriveRadius: 0.8
+--- !u!114 &2041584606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041584590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d11e1ff0e1f56845b6330eb1e4fd7f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.AwarenessGauge
+  perception: {fileID: 0}
+  body: {fileID: 0}
+  viewCamera: {fileID: 0}
+  heightOffset: 2.1
+  anchor: {fileID: 0}
+  sweepDegrees: 360
+  innerRadius: 0.22
+  outerRadius: 0.35
+  segments: 48
+  calmColor: {r: 0.86, g: 0.9, b: 0.94, a: 0.35}
+  warnColor: {r: 1, g: 0.84, b: 0.3, a: 0.8}
+  alertColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  warnThreshold: 0.3
+  alertThreshold: 0.6
+  hideBelow: 0.02
+  gaugeMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &2062714814
 GameObject:
   m_ObjectHideFlags: 0
@@ -24753,6 +25160,7 @@ GameObject:
   - component: {fileID: 2108297470}
   - component: {fileID: 2108297471}
   - component: {fileID: 2108297472}
+  - component: {fileID: 2108297473}
   m_Layer: 13
   m_Name: Guard_1
   m_TagString: Untagged
@@ -24834,6 +25242,12 @@ MonoBehaviour:
   targetHeight: 1
   farDetectScale: 0.3
   hearingMemory: 0.35
+  nearbyRadius: 3
+  nearbyPerSecond: 1.2
+  nearbyCrouchScale: 0.45
+  nearbyQuietScale: 0.4
+  nearbyMaxAwareness: 0.55
+  nearbyClueFollowSpeed: 2
   gunshotAwareness: 0.9
   allyAlertRadius: 14
   allyAlertPerSecond: 0.5
@@ -25078,6 +25492,36 @@ MonoBehaviour:
   threatHeight: 1.4
   navSampleRadius: 1
   arriveRadius: 0.8
+--- !u!114 &2108297473
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2108297457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d11e1ff0e1f56845b6330eb1e4fd7f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.AwarenessGauge
+  perception: {fileID: 0}
+  body: {fileID: 0}
+  viewCamera: {fileID: 0}
+  heightOffset: 2.1
+  anchor: {fileID: 0}
+  sweepDegrees: 360
+  innerRadius: 0.22
+  outerRadius: 0.35
+  segments: 48
+  calmColor: {r: 0.86, g: 0.9, b: 0.94, a: 0.35}
+  warnColor: {r: 1, g: 0.84, b: 0.3, a: 0.8}
+  alertColor: {r: 1, g: 0.32, b: 0.24, a: 1}
+  warnThreshold: 0.3
+  alertThreshold: 0.6
+  hideBelow: 0.02
+  gaugeMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &2114994206
 GameObject:
   m_ObjectHideFlags: 0

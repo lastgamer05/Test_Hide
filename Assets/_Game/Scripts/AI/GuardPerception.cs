@@ -27,6 +27,23 @@ namespace ByAWhisker.AI
         [Tooltip("이 시간 안에 난 소리까지 듣는다. 한 프레임만 보면 발소리를 놓친다.")]
         [SerializeField] private float hearingMemory = 0.35f;
 
+        [Header("인기척")]
+        [Tooltip("시야각도 낮은 엄폐도 따지지 않고 그냥 느끼는 반경(m). 이 안이면 등 뒤라도 안다.")]
+        [SerializeField] private float nearbyRadius = 3f;
+        [Tooltip("코앞에서 서서 움직일 때 초당 오르는 의심도. 멀어질수록 곧게 줄어 반경 끝에서 0이 된다.")]
+        [SerializeField] private float nearbyPerSecond = 1.2f;
+        [Tooltip("앉아 있을 때의 배율. 몸을 낮추면 기척이 준다.")]
+        [Range(0f, 1f)]
+        [SerializeField] private float nearbyCrouchScale = 0.45f;
+        [Tooltip("소리를 하나도 내지 않을 때의 배율. 소음이 1이면 배율도 1이 된다.")]
+        [Range(0f, 1f)]
+        [SerializeField] private float nearbyQuietScale = 0.4f;
+        [Tooltip("인기척만으로 오를 수 있는 의심도의 끝. 두뇌의 Search 문턱(0.6)보다 낮게 둔다. UpdateNearby 주석 참고.")]
+        [Range(0f, 1f)]
+        [SerializeField] private float nearbyMaxAwareness = 0.55f;
+        [Tooltip("인기척이 가리키는 자리가 플레이어를 따라가는 속도. 느릴수록 뒤로 처져 흐려진다.")]
+        [SerializeField] private float nearbyClueFollowSpeed = 2f;
+
         [Header("총성")]
         [Tooltip("총성 한 번에 오르는 의심도. 발소리처럼 천천히 차면 코앞에서 쏴도 알아채지 못한다.")]
         [SerializeField] private float gunshotAwareness = 0.9f;
@@ -80,6 +97,13 @@ namespace ByAWhisker.AI
         // 같은 총성이 hearingMemory 동안 버퍼에 남아 있다. 한 발에 한 번만 놀라려고
         // 마지막으로 반응한 총성의 시각을 적어 둔다.
         private float _lastGunshotTime;
+
+        // 인기척이 이번 프레임에 의심을 먹였는가. 시각 쪽 망각을 멈추는 데 쓴다.
+        private bool _nearbyFeeding;
+
+        // 인기척이 가리키는 대략의 자리와, 지난 프레임에도 느끼고 있었는지.
+        private Vector3 _nearbyClue;
+        private bool _nearbyFelt;
 
         // 밖에서 들어온 경보. Alarm은 남의 Update에서도 불리는데 이쪽 Update가 그 뒤에 돌면
         // 두뇌가 읽기도 전에 HeardSomething이 지워진다. 그래서 한 프레임 더 들고 있는다.
@@ -151,6 +175,9 @@ namespace ByAWhisker.AI
             _nextAllyScan = 0f;
             _lastAllySpread = 0f;
 
+            _nearbyFeeding = false;
+            _nearbyFelt = false;
+
             // 재시작하면 소리 버스도 비워지지만, 방금 전 총성에 다시 놀라지 않게 기준 시각을 지금으로 당긴다.
             _lastGunshotTime = Time.time;
         }
@@ -196,6 +223,10 @@ namespace ByAWhisker.AI
             _visibleBody = null;
             _nextBodyScan = 0f;
             _alarmed = false;
+
+            // 깨어난 뒤에 옛 기척부터 이어 받지 않게 한다. 다시 느끼면 그때 처음부터 센다.
+            _nearbyFeeding = false;
+            _nearbyFelt = false;
         }
 
         private void Update()
@@ -205,6 +236,11 @@ namespace ByAWhisker.AI
             // 두뇌가 한 번도 못 보고 지나간다. 그 한 프레임만 살려서 넘긴다.
             HeardSomething = _alarmed;
             _alarmed = false;
+
+            // 아래 어느 길로 빠져나가도 기척은 이번 프레임에 없던 것이 된다. 켜 둔 채로 두면
+            // 판정이 멈춘 사이에도 망각이 계속 막힌다.
+            _nearbyFeeding = false;
+            _nearbyFelt = _nearbyFelt && profile != null && _player != null;
 
             if (profile == null)
             {
@@ -228,6 +264,9 @@ namespace ByAWhisker.AI
                 ? _exposure.BodyPoint
                 : _player.position + Vector3.up * targetHeight;
 
+            // 인기척을 먼저 본다. 이쪽이 남기는 단서는 가장 흐린 것이라, 같은 프레임에 눈이나 귀가
+            // 더 또렷한 자리를 알아내면 그것이 덮어쓰게 두어야 한다.
+            UpdateNearby(targetPoint, dt);
             UpdateSight(targetPoint, dt);
             UpdateHearing();
             SpreadToAllies();
@@ -256,10 +295,77 @@ namespace ByAWhisker.AI
                 float scale = Mathf.Lerp(1f, farDetectScale, closeness);
                 Awareness = Mathf.Clamp01(Awareness + dt / seconds * scale);
             }
-            else
+            else if (!_nearbyFeeding)
             {
                 Awareness = Mathf.Clamp01(Awareness - profile.forgetPerSecond * dt);
             }
+            // 인기척을 느끼는 동안에는 잊지 않는다. 안 그러면 앉아서 가만히 있는 플레이어의
+            // 느린 기척이 망각에 그대로 상쇄되어, 코앞에 붙어 있어도 의심도가 제자리걸음만 한다.
+        }
+
+        /// <summary>
+        /// 시야각도 낮은 엄폐도 따지지 않고 거리만으로 오르는 의심. 옆에 사람이 서 있는 것을
+        /// 못 알아채는 것은 규칙이 아니라 구멍이라 여기서 메운다.
+        /// 벽만은 센다. 벽을 사이에 두고 붙어 있는 것까지 느끼면 벽이 뜻을 잃는다.
+        /// 낮은 엄폐는 넘긴다 — 상자 뒤에 앉아 있어도 바로 옆이면 인기척이 난다는 뜻이다.
+        ///
+        /// 의심도는 nearbyMaxAwareness에서 멈춘다. 두뇌의 문턱이 Suspicious 0.3 / Search 0.6이라
+        /// 이 값이 그 사이에 있으면 경비는 돌아보기만 하고 달려가지는 않는다.
+        /// 기척은 "저쪽에 뭔가 있다"까지고, 쫓을지 말지는 눈으로 확인한 뒤라야 한다.
+        /// 이것만으로 Alert까지 가면 어둠 속에서 스쳐 지나가기만 해도 총이 날아온다.
+        /// </summary>
+        private void UpdateNearby(Vector3 targetPoint, float dt)
+        {
+            _nearbyFeeding = false;
+
+            // 이번에 처음 느낀 것인지 알아야 단서를 어디서부터 따라가게 할지 정할 수 있다.
+            bool felt = _nearbyFelt;
+            _nearbyFelt = false;
+
+            if (nearbyRadius <= 0f || nearbyPerSecond <= 0f) return;
+
+            // 이 감각이 낼 수 있는 최대치를 이미 넘었다면 그 의심은 눈이나 귀나 동료가 준 것이다.
+            // 그쪽이 적어 둔 또렷한 단서를 흐린 단서로 덮지 않으려고 여기서 손을 뗀다.
+            if (Awareness > nearbyMaxAwareness) return;
+
+            Vector3 origin = EyePosition;
+            float distance = Sight.HorizontalDistance(origin, targetPoint);
+            if (distance > nearbyRadius) return;
+
+            // 낮은 엄폐는 넘기고 벽과 높은 엄폐만 본다.
+            if (!Sight.HasLineOfSight(origin, targetPoint, blockers)) return;
+
+            // 반경 끝에서 0이 되게 두어 경계를 넘나들 때 값이 튀지 않게 한다.
+            float closeness = 1f - distance / nearbyRadius;
+            float posture = _exposure != null && _exposure.Crouching ? nearbyCrouchScale : 1f;
+            float noise = _exposure != null ? Mathf.Clamp01(_exposure.Noise) : 0f;
+            float loudness = Mathf.Lerp(nearbyQuietScale, 1f, noise);
+
+            float gain = nearbyPerSecond * closeness * posture * loudness * dt;
+            if (gain <= 0f) return;
+
+            _nearbyFeeding = true;
+            Awareness = Mathf.Min(nearbyMaxAwareness, Awareness + gain);
+
+            // 느낌으로는 정확한 자리를 알 수 없으므로 Alarm을 쓰지 않는다. Alarm은 넘긴 자리를
+            // 그대로 LastKnownPosition에 박고 HeardSomething까지 올려서, 두뇌가 곧장 Search로 달려간다.
+            // 대신 플레이어를 한 박자 늦게 따라가는 점을 단서로 둔다. 움직일수록 뒤로 처져서
+            // "방금 저쪽에 뭔가 있었다"가 되고, 경비는 Suspicious에서 그쪽을 돌아본다.
+            // 여기서 덮어써도 엉뚱한 데로 달려가지 않는 것은 위에서 의심도를 Search 문턱 아래로 묶어 두기 때문이다.
+            if (felt)
+            {
+                // 프레임 레이트가 흔들려도 같은 속도로 붙도록 지수 보간을 쓴다. PlayerExposure의 밝기와 같은 방식이다.
+                float t = 1f - Mathf.Exp(-nearbyClueFollowSpeed * dt);
+                _nearbyClue = Vector3.Lerp(_nearbyClue, _player.position, t);
+            }
+            else
+            {
+                // 처음 느낀 순간에는 따라갈 자리가 없다. 그 자리에서 시작해 이후로 처지게 한다.
+                _nearbyClue = _player.position;
+            }
+
+            _nearbyFelt = true;
+            LastKnownPosition = _nearbyClue;
         }
 
         /// <summary>

@@ -64,7 +64,7 @@ MonoBehaviour:
   cellSize: 2
   wallHeight: 3.6
   highCoverHeight: 3
-  lowCoverHeight: 1.15
+  lowCoverHeight: 1.5
   floorMaterial: {fileID: 2100000, guid: 4ff2e63ab9ead804ca402db12ca66d4a, type: 2}
   wallMaterial: {fileID: 2100000, guid: 78f3b7696166d504dbce00c38d520a75, type: 2}
   highCoverMaterial: {fileID: 2100000, guid: 302e663a87c1e33498a390d3b4bbd310, type: 2}

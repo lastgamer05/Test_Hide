@@ -16,7 +16,7 @@ namespace ByAWhisker.Level
         public float cellSize = 2f;
         public float wallHeight = 3.6f;
         public float highCoverHeight = 3f;
-        public float lowCoverHeight = 1.15f;
+        public float lowCoverHeight = 1.5f;
 
         [Header("머티리얼")]
         public Material floorMaterial;

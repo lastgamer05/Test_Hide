@@ -360,7 +360,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
   source: {fileID: 0}
-  segments: 24
+  segments: 48
+  blockers:
+    serializedVersion: 2
+    m_Bits: 1536
   groundHeight: 0.06
   beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
   strength: 0.55
@@ -498,7 +501,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
   source: {fileID: 0}
-  segments: 24
+  segments: 48
+  blockers:
+    serializedVersion: 2
+    m_Bits: 1536
   groundHeight: 0.06
   beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
   strength: 0.55
@@ -4459,7 +4465,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
   source: {fileID: 0}
-  segments: 24
+  segments: 48
+  blockers:
+    serializedVersion: 2
+    m_Bits: 1536
   groundHeight: 0.06
   beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
   strength: 0.55
@@ -5883,7 +5892,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
   source: {fileID: 0}
-  segments: 24
+  segments: 48
+  blockers:
+    serializedVersion: 2
+    m_Bits: 1536
   groundHeight: 0.06
   beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
   strength: 0.55
@@ -7551,7 +7563,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
   source: {fileID: 0}
-  segments: 24
+  segments: 48
+  blockers:
+    serializedVersion: 2
+    m_Bits: 1536
   groundHeight: 0.06
   beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
   strength: 0.55
@@ -8336,7 +8351,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
   source: {fileID: 0}
-  segments: 24
+  segments: 48
+  blockers:
+    serializedVersion: 2
+    m_Bits: 1536
   groundHeight: 0.06
   beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
   strength: 0.55
@@ -12435,7 +12453,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
   source: {fileID: 0}
-  segments: 24
+  segments: 48
+  blockers:
+    serializedVersion: 2
+    m_Bits: 1536
   groundHeight: 0.06
   beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
   strength: 0.55
@@ -16697,7 +16718,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
   source: {fileID: 0}
-  segments: 24
+  segments: 48
+  blockers:
+    serializedVersion: 2
+    m_Bits: 1536
   groundHeight: 0.06
   beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
   strength: 0.55
@@ -18491,6 +18515,7 @@ MonoBehaviour:
   floorTopHeight: 0
   floorThicknessScale: 1
   floorUnderCover: 1
+  floorUnderWalls: 1
   wallPanels:
   - {fileID: 919132149155446097, guid: 7e5589e376b58284aa88ee2c45586dbc, type: 3}
   wallAccentPanels:
@@ -21207,7 +21232,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
   source: {fileID: 0}
-  segments: 24
+  segments: 48
+  blockers:
+    serializedVersion: 2
+    m_Bits: 1536
   groundHeight: 0.06
   beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
   strength: 0.55
@@ -22568,7 +22596,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
   source: {fileID: 0}
-  segments: 24
+  segments: 48
+  blockers:
+    serializedVersion: 2
+    m_Bits: 1536
   groundHeight: 0.06
   beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
   strength: 0.55
@@ -22904,7 +22935,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
   source: {fileID: 0}
-  segments: 24
+  segments: 48
+  blockers:
+    serializedVersion: 2
+    m_Bits: 1536
   groundHeight: 0.06
   beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
   strength: 0.55
@@ -24871,7 +24905,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
   source: {fileID: 0}
-  segments: 24
+  segments: 48
+  blockers:
+    serializedVersion: 2
+    m_Bits: 1536
   groundHeight: 0.06
   beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
   strength: 0.55

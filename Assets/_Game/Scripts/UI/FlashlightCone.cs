@@ -21,9 +21,14 @@ namespace ByAWhisker.UI
         [SerializeField] private Perception.LightSource source;
 
         [Header("모양")]
-        [Tooltip("부채꼴을 나눌 조각 수. 적으면 55도 부채꼴의 호가 꺾여 보인다.")]
+        [Tooltip("부채꼴을 나눌 조각 수. 조각마다 광선 하나로 벽을 재므로 적으면 좁은 문틈을 지나는 빛이 뭉개진다.")]
         [Range(6, 128)]
-        [SerializeField] private int segments = 24;
+        [SerializeField] private int segments = 48;
+
+        [Tooltip(
+            "빛을 막는 레이어. 비우면 Wall과 HighCover. 판정(Illumination)은 벽에 막힌 곳을 어둡다고 보므로 " +
+            "그림도 벽에서 끊어야 한다. 안 끊으면 벽 너머 바닥에 빛이 그려져 거기 서도 안 들킨다.")]
+        [SerializeField] private LayerMask blockers;
 
         [Tooltip(
             "부채꼴을 그릴 높이(월드 y). 층이 하나뿐이라 바닥 높이를 하나로 둘 수 있다. " +
@@ -83,6 +88,11 @@ namespace ByAWhisker.UI
 
         private int _segments;
 
+        // 호의 정점마다: 로컬 방향(단위), 사거리 끝의 진하기, 이번 프레임에 벽까지 닿은 거리.
+        private Vector3[] _directions;
+        private float[] _rimAlphas;
+        private float _centerAlpha;
+
         // 지금 구워 둔 모양. LightSource의 값이 바뀔 때만 정점을 다시 채운다.
         // -1로 시작해서 첫 LateUpdate가 반드시 한 번 채우게 한다.
         private float _sweep = -1f;
@@ -110,6 +120,7 @@ namespace ByAWhisker.UI
         private void Awake()
         {
             if (source == null) source = GetComponent<Perception.LightSource>();
+            if (blockers.value == 0) blockers = LayerMask.GetMask("Wall", "HighCover");
 
             BuildMesh();
             BuildObject();
@@ -186,6 +197,9 @@ namespace ByAWhisker.UI
                 _object.transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
             }
 
+            // 경비는 늘 움직이고 돌아서 벽까지의 거리가 매 프레임 바뀐다. 조각 수만큼 광선을 쏜다.
+            Clip(radius);
+
             Show(true);
         }
 
@@ -216,15 +230,48 @@ namespace ByAWhisker.UI
             for (int i = 0; i <= _segments; i++)
             {
                 float a = -half + step * i;
-                int v = i + 1;
 
                 // +Z가 부채꼴의 가운데다. 눕히고 돌리는 일은 트랜스폼이 맡으므로 y는 늘 0이다.
-                _vertices[v].x = Mathf.Sin(a) * radius;
-                _vertices[v].y = 0f;
-                _vertices[v].z = Mathf.Cos(a) * radius;
+                _directions[i] = new Vector3(Mathf.Sin(a), 0f, Mathf.Cos(a));
+            }
+        }
+
+        /// <summary>
+        /// 조각마다 손전등 높이에서 수평으로 광선을 쏴 벽에 닿는 데까지만 그린다.
+        /// Illumination은 손전등에서 대상까지 Linecast로 막힘을 보고, 손전등은 가슴 높이라
+        /// 벽과 높은 엄폐는 수평 광선과 같은 답을 준다.
+        ///
+        /// 진하기는 거리에 정비례해서 옅어지므로(1 - 거리/사거리) 잘린 끝의 진하기도 같은 직선 위에서 고른다.
+        /// 그래야 잘린 부채꼴의 밝기가 판정의 밝기와 그대로 맞는다.
+        /// </summary>
+        private void Clip(float radius)
+        {
+            Vector3 origin = transform.position;
+            Quaternion rotation = _object.transform.rotation;
+            float inverse = radius > 0.0001f ? 1f / radius : 0f;
+
+            for (int i = 0; i <= _segments; i++)
+            {
+                Vector3 direction = _directions[i];
+                float reach = radius;
+
+                RaycastHit hit;
+                if (Physics.Raycast(origin, rotation * direction, out hit, radius, blockers.value, QueryTriggerInteraction.Ignore))
+                {
+                    reach = hit.distance;
+                }
+
+                int v = i + 1;
+                _vertices[v] = direction * reach;
+
+                Color color = beamColor;
+                color.a = Mathf.Lerp(_centerAlpha, _rimAlphas[i], reach * inverse);
+                _colors[v] = color;
             }
 
             _mesh.SetVertices(_vertices);
+            _mesh.SetColors(_colors);
+            _mesh.RecalculateBounds();
         }
 
         /// <summary>
@@ -241,16 +288,15 @@ namespace ByAWhisker.UI
 
             color.a = center;
             _colors[0] = color;
+            _centerAlpha = center;
 
             for (int i = 0; i <= _segments; i++)
             {
                 // 가운데 0, 양 끝 1. 옆으로 갈수록 옅어져야 빔처럼 읽힌다.
+                // 호의 진하기는 여기서 기억만 하고, 벽에 잘린 거리에 맞춰 Clip이 정점에 넣는다.
                 float t = Mathf.Abs((float)i / _segments * 2f - 1f);
-                color.a = center * rimAlpha * Mathf.Lerp(1f, 1f - edgeSoftness, t);
-                _colors[i + 1] = color;
+                _rimAlphas[i] = center * rimAlpha * Mathf.Lerp(1f, 1f - edgeSoftness, t);
             }
-
-            _mesh.SetColors(_colors);
         }
 
         private void BuildMesh()
@@ -262,6 +308,8 @@ namespace ByAWhisker.UI
             _vertices = new Vector3[vertexCount];
             _colors = new Color[vertexCount];
             _triangles = new int[_segments * 3];
+            _directions = new Vector3[_segments + 1];
+            _rimAlphas = new float[_segments + 1];
 
             for (int i = 0; i < _segments; i++)
             {

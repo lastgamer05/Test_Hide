@@ -18402,6 +18402,128 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1333300273}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1491463892
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1491463895}
+  - component: {fileID: 1491463894}
+  - component: {fileID: 1491463893}
+  m_Layer: 0
+  m_Name: LevelDressing
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1491463893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1491463892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67453e3b224048e4fb8f2075bc4449ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Level.PropDresser
+  levelBuilder: {fileID: 106722269}
+  highSolidModels: []
+  highPileModels: []
+  highSolidChance: 0.35
+  highPileLayers: 2
+  highTopJitter: 0.12
+  lowSolidModels: []
+  lowPileModels: []
+  lowSolidChance: 0.4
+  lowPileLayers: 2
+  lowTopJitter: 0.03
+  cellFill: 0.94
+  pileFill: 0.9
+  pileTaper: 0.08
+  hideModels:
+  - {fileID: 919132149155446097, guid: 61a019148429a7245b18eb4b8ead4755, type: 3}
+  hideTopModel: {fileID: 919132149155446097, guid: 8d6a03ed35af29844ab50e42e6206079, type: 3}
+  hideTopHeight: 0.8
+  hideTopFill: 0.85
+  keyModels:
+  - {fileID: 919132149155446097, guid: df28705de3cf75c469b302f64aff8133, type: 3}
+  - {fileID: 919132149155446097, guid: 049a87b413dda6a4c84e2200d950049d, type: 3}
+  keyFootprint: 1.4
+  exitModels:
+  - {fileID: 919132149155446097, guid: c15af071e6239c845ac6eaac7a6c90a2, type: 3}
+  - {fileID: 919132149155446097, guid: a2ffba8979279584c9493d5cf3d0691c, type: 3}
+  exitWidth: 1.8
+  exitMaxHeight: 3
+  exitWallScan: 8
+  lampOnModel: {fileID: 919132149155446097, guid: 3de2ac8dcfd24a44c92873d683a8290a, type: 3}
+  lampOffModel: {fileID: 919132149155446097, guid: 661b69f6b2a4b7c4e92c2aaad1177890, type: 3}
+  lampGlowMaterial: {fileID: 2100000, guid: abc852ef6204ec84680cbce7e38838a7, type: 2}
+  lampSize: 0.7
+  lampOffset: {x: 0, y: 0, z: 0}
+  kitScale: 2
+  seed: 1511
+  batchStatic: 1
+--- !u!114 &1491463894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1491463892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8850239f47b53b848a32fbcf408a37f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Level.StructureDresser
+  levelBuilder: {fileID: 106722269}
+  floorTiles:
+  - {fileID: 919132149155446097, guid: ffc6b77f61d9dd648b4d5e0802af5761, type: 3}
+  floorAccentTiles:
+  - {fileID: 919132149155446097, guid: 361b98405bd40384482ba72145f756aa, type: 3}
+  - {fileID: 919132149155446097, guid: 1ab68a3aed832eb4fb459eec7741db4b, type: 3}
+  floorAccentChance: 0.08
+  floorTopHeight: 0
+  floorThicknessScale: 1
+  floorUnderCover: 1
+  wallPanels:
+  - {fileID: 919132149155446097, guid: 7e5589e376b58284aa88ee2c45586dbc, type: 3}
+  wallAccentPanels:
+  - {fileID: 919132149155446097, guid: 2d3e73a46532a93449cfead6bf884523, type: 3}
+  - {fileID: 919132149155446097, guid: 03fd26c27fc5b694db1d8511729b64ec, type: 3}
+  - {fileID: 919132149155446097, guid: 6bfc25e9f96ba9b4880b32c51b4afa4f, type: 3}
+  wallAccentChance: 0.15
+  faceYawOffset: 0
+  panelThicknessScale: 1
+  faceCoverCells: 1
+  outerCorner: {fileID: 919132149155446097, guid: 0aec4579434e74045b94d5fcf8f1c782, type: 3}
+  innerCorner: {fileID: 919132149155446097, guid: adb7c26e11009414685d4443c9197902, type: 3}
+  cornerSize: 0.6
+  cornerProtrusion: 0.06
+  cornerYawOffset: 0
+  wallCapMaterial: {fileID: 0}
+  wallCapThickness: 0.08
+  seed: 1507
+--- !u!4 &1491463895
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1491463892}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1494596385
 GameObject:
   m_ObjectHideFlags: 0
@@ -27045,3 +27167,4 @@ SceneRoots:
   - {fileID: 3792751515875511878}
   - {fileID: 1382546211}
   - {fileID: 737675948}
+  - {fileID: 1491463895}

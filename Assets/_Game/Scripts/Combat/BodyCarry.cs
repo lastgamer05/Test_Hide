@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ByAWhisker.Core;
+using ByAWhisker.Level;
 
 namespace ByAWhisker.Combat
 {
@@ -8,6 +9,9 @@ namespace ByAWhisker.Combat
     /// 쓰러진 몸을 들고 옮긴다. 플레이어에 붙는다.
     /// 총을 쓴 값을 치르게 하는 장치다. 쏜 자리를 치우지 않으면 지나가던 경비가 시체를 보고 놀란다.
     /// 드는 동안에는 손이 막혀 총을 쏘지 못하고 걸음도 느려진다.
+    ///
+    /// 상자(Container)를 쓰는 창구도 여기다. 키를 늘리지 않기로 했으니 G 하나가 몸을 드는 일과
+    /// 상자에 넣는 일과 상자에 숨는 일을 함께 맡고, 무엇이 될지는 손에 든 것과 옆에 있는 것이 정한다.
     /// </summary>
     public class BodyCarry : MonoBehaviour
     {
@@ -52,17 +56,34 @@ namespace ByAWhisker.Combat
         [Range(0.1f, 1f)]
         [SerializeField] private float carrySpeedMultiplier = 0.55f;
 
+        [Header("상자")]
+        [Tooltip("상자가 붙어 있는 레이어. HighCover. 상자는 높은 엄폐물에 붙는다.")]
+        [SerializeField] private LayerMask containerLayers;
+
+        [Tooltip("이 거리 안이어야 상자를 쓸 수 있다(m). 콜라이더의 가장 가까운 면까지로 잰다. 집는 거리와 비슷하게 둔다.")]
+        [SerializeField] private float containerRange = 2.1f;
+
+        [Tooltip("한 번에 살펴볼 콜라이더 수. 상자 몇 개가 붙어 있어도 이 정도면 넉넉하다.")]
+        [SerializeField] private int maxContainerOverlap = 8;
+
         // 씬의 몸들. 아래 EnsureBodies 주석 참고. 한 번만 모으므로 매 프레임 할당이 아니다.
         private Damageable[] _bodies;
 
         // 우리가 직접 끈 콜라이더만 적어 둔다. 재사용하는 목록이라 집을 때마다 새로 만들지 않는다.
         private readonly List<Collider> _disabled = new List<Collider>(8);
 
+        // OverlapSphereNonAlloc이 여기에 채운다. GuardPerception이 시체를 훑는 방식과 같다.
+        private Collider[] _containerOverlap;
+
         private Damageable _self;
         private Damageable _target;
         private Damageable _carried;
         private Transform _carriedParent;
+        private Container _container;
+        private Container _hiding;
         private float _nextScan;
+
+        private ByAWhisker.UI.ControlsOverlay _overlay;
 
         /// <summary>지금 몸을 들고 있는가. 총을 막고 걸음을 늦추는 쪽이 읽어 간다.</summary>
         public bool IsCarrying { get { return _carried != null; } }
@@ -70,16 +91,36 @@ namespace ByAWhisker.Combat
         /// <summary>지금 집을 수 있는 몸이 있는가. HUD가 이걸 보고 안내를 띄운다.</summary>
         public bool HasTarget { get { return _target != null; } }
 
+        /// <summary>지금 쓸 수 있는 상자가 옆에 있는가. HUD가 이걸 보고 안내를 띄운다.</summary>
+        public bool HasContainer { get { return _container != null; } }
+
+        /// <summary>
+        /// 지금 상자 안에 숨어 있는가.
+        /// 우리가 든 깃발이 아니라 상자에게 물어본다. 재시작처럼 상자가 스스로 플레이어를 내보내는
+        /// 길이 있어서, 깃발을 따로 두면 그 길에서 배율이 0에 묶인 채 남아 영영 못 움직인다.
+        /// </summary>
+        public bool IsHiding { get { return _hiding != null && _hiding.PlayerInside; } }
+
         /// <summary>
         /// 들고 있는 동안 이동 속도에 곱할 값. 들고 있지 않으면 1이다.
         /// PlayerMotor를 고치지 않고는 속도를 깎을 자리가 없어서 값만 내놓는다.
+        /// 상자 안에서 0을 내놓는 것도 같은 이유다. 플레이어를 묶어 둘 자리가 여기뿐이다.
         /// </summary>
-        public float SpeedMultiplier { get { return IsCarrying ? carrySpeedMultiplier : 1f; } }
+        public float SpeedMultiplier
+        {
+            get
+            {
+                if (IsHiding) return 0f;
+                return IsCarrying ? carrySpeedMultiplier : 1f;
+            }
+        }
 
         private void Awake()
         {
             // 자기 몸을 자기가 들지 않도록 어디까지가 자기인지 한 번 정해 둔다. TakedownAction이 쓰는 기준과 같다.
             _self = GetComponentInParent<Damageable>();
+
+            _containerOverlap = new Collider[Mathf.Max(1, maxContainerOverlap)];
         }
 
         private void OnEnable()
@@ -93,36 +134,68 @@ namespace ByAWhisker.Combat
 
             // 잡히거나 재시작으로 꺼질 때 몸을 플레이어에 매단 채 두면 영영 떨어지지 않는다.
             if (IsCarrying) Drop();
+
+            // 숨은 채로 꺼지면 경비의 눈과 플레이어의 발이 상자에 붙잡힌 채로 남는다.
+            ReleaseHiding();
+
             _target = null;
+            _container = null;
             _nextScan = 0f;
         }
 
         private void Update()
         {
-            if (IsCarrying)
-            {
-                // 들고 있는 동안에는 다음 대상을 찾지 않는다. 안내가 깜빡이는 것을 막는다.
-                _target = null;
-                return;
-            }
+            // 숨어 있는 동안에는 아무것도 찾지 않는다. 나오는 것 말고는 할 수 있는 일이 없다.
+            if (IsHiding) return;
 
             if (Time.time < _nextScan) return;
             _nextScan = Time.time + scanInterval;
 
-            _target = FindTarget();
+            // 넣을 곳은 몸을 들고 있을 때도 알아야 한다. 어디에 넣을 수 있는지 모르면 상자를 찾아 헤맨다.
+            _container = FindContainer();
+
+            // 들고 있는 동안에는 다음 대상을 찾지 않는다. 안내가 깜빡이는 것을 막는다.
+            _target = IsCarrying ? null : FindTarget();
         }
 
-        /// <summary>들고 있으면 내려놓고, 아니면 가장 가까운 몸을 집는다.</summary>
+        /// <summary>
+        /// G 하나가 네 가지를 맡는다. 무엇이 될지는 지금 손에 든 것과 옆에 있는 것이 정한다.
+        /// 갈리는 순서가 곧 규칙이다. 숨어 있으면 나오기, 들고 있으면 넣기 아니면 내려놓기,
+        /// 빈손이면 숨기 아니면 집기.
+        /// </summary>
         public void Toggle()
         {
-            if (IsCarrying)
+            // 상자 안에서는 다른 것이 되지 않는다. 안에서 몸을 집거나 넣는 그림은 없다.
+            if (IsHiding)
             {
-                Drop();
+                LeaveContainer();
                 return;
             }
 
             // 누른 순간의 상황으로 판정한다. 0.1초 전에 훑어 둔 자리로 집으면 이미 지나쳐 온 몸이 딸려 온다.
             _nextScan = Time.time + scanInterval;
+            _container = FindContainer();
+
+            if (IsCarrying)
+            {
+                // 상자 앞이면 넣는다. 자리가 없으면 지금까지처럼 바닥에 내려놓되 왜 안 들어갔는지 알려 준다.
+                if (_container == null) Drop();
+                else if (_container.HasRoom) StashInto(_container);
+                else
+                {
+                    Drop();
+                    Flash("상자가 가득 찼다");
+                }
+
+                return;
+            }
+
+            if (_container != null)
+            {
+                EnterContainer(_container);
+                return;
+            }
+
             _target = FindTarget();
 
             if (_target == null) return;
@@ -147,20 +220,86 @@ namespace ByAWhisker.Combat
 
         private void Drop()
         {
-            Transform body = _carried.transform;
+            PlaceOnGround(Release());
+        }
+
+        /// <summary>
+        /// 손을 뗀다. 자리는 부르는 쪽이 정한다. 바닥에 놓는 길과 상자에 넣는 길이 여기서 갈리는데,
+        /// 부모와 콜라이더를 되돌리는 일은 어느 길이든 똑같이 해야 한다.
+        /// </summary>
+        private Damageable Release()
+        {
+            Damageable body = _carried;
 
             // 월드 자세를 지킨 채 원래 부모로 돌린다. 부모가 사라졌으면 씬 뿌리에 둔다.
-            body.SetParent(_carriedParent != null ? _carriedParent : null, true);
-            body.position = DropPosition();
+            body.transform.SetParent(_carriedParent != null ? _carriedParent : null, true);
 
             RestoreColliders();
 
             _carried = null;
             _carriedParent = null;
 
+            return body;
+        }
+
+        private void PlaceOnGround(Damageable body)
+        {
+            body.transform.position = DropPosition();
+
             // 자리와 콜라이더를 한꺼번에 바꿨으니 물리 쪽 사본을 지금 맞춘다.
             // 다음 물리 프레임까지 두면 경비가 아직 없는 자리의 몸에 걸린다.
             Physics.SyncTransforms();
+        }
+
+        /// <summary>
+        /// 들고 온 몸을 상자에 넣는다. 상자가 거절하면 그 자리에 놓는다.
+        /// 손도 상자도 비면 몸이 공중에 남는다.
+        /// </summary>
+        private void StashInto(Container container)
+        {
+            Damageable body = Release();
+
+            if (container.TryStash(body))
+            {
+                Flash("상자에 숨겼다");
+                return;
+            }
+
+            PlaceOnGround(body);
+        }
+
+        /// <summary>
+        /// 상자에 들어간다. 우리 쪽 상태는 상자가 받아 줬을 때만 바꾼다.
+        /// 들어간 뒤에는 SpeedMultiplier가 0이 되어 발이 묶이고, 경비는 플레이어를 놓친다.
+        /// </summary>
+        private void EnterContainer(Container container)
+        {
+            if (!container.ToggleHide(transform)) return;
+
+            _hiding = container;
+            _target = null;
+
+            Flash("상자에 숨었다. G로 나온다");
+        }
+
+        private void LeaveContainer()
+        {
+            if (ReleaseHiding()) Flash("상자에서 나왔다");
+        }
+
+        /// <summary>
+        /// 상자에서 나온다. 들어간 자리로 돌려놓는 일은 상자가 한다. 안에 있었으면 true다.
+        /// 재시작이나 컴포넌트가 꺼지는 길도 여기를 지난다. 그 길에서는 글자를 띄우지 않는다.
+        /// </summary>
+        private bool ReleaseHiding()
+        {
+            if (_hiding == null) return false;
+
+            bool wasInside = _hiding.PlayerInside;
+            if (wasInside) _hiding.ToggleHide(transform);
+            _hiding = null;
+
+            return wasInside;
         }
 
         /// <summary>발밑 앞쪽. 그 자리가 막혀 있으면 내 발밑에 놓는다.</summary>
@@ -255,12 +394,61 @@ namespace ByAWhisker.Combat
         }
 
         /// <summary>
+        /// 가까운 상자 하나. 몸과 달리 물리 질의로 찾는다. 상자는 높은 엄폐물에 붙어 있어서
+        /// 콜라이더가 늘 살아 있고, 그래서 씬을 미리 훑어 둘 필요가 없다.
+        /// 거리는 중심이 아니라 콜라이더의 가장 가까운 면까지로 잰다. 높은 엄폐는 여러 칸이 한 덩어리로
+        /// 붙어 있어서(6m짜리도 있다) 중심까지 재면 옆에 딱 붙어 서도 닿지 않는다.
+        /// 트리거도 센다. 상자의 입을 트리거 볼륨으로 따로 놓아도 되게 열어 두는 것이다.
+        /// </summary>
+        private Container FindContainer()
+        {
+            Vector3 here = transform.position;
+
+            int count = Physics.OverlapSphereNonAlloc(
+                here, containerRange, _containerOverlap, containerLayers.value, QueryTriggerInteraction.Collide);
+
+            Container best = null;
+            float bestDistance = float.MaxValue;
+
+            for (int i = 0; i < count; i++)
+            {
+                Collider hit = _containerOverlap[i];
+                if (hit == null) continue;
+
+                // 콜라이더가 자식에 달려 있을 수 있으니 부모까지 올라가서 찾는다.
+                Container candidate = hit.GetComponentInParent<Container>();
+                if (candidate == null) continue;
+
+                float distance = HorizontalDistance(here, hit.ClosestPoint(here));
+                if (distance >= bestDistance) continue;
+
+                bestDistance = distance;
+                best = candidate;
+            }
+
+            return best;
+        }
+
+        /// <summary>
         /// 제압해 기절한 몸은 IsDown이고, 총에 맞아 죽은 몸은 IsAlive가 false다.
         /// 쏜 자리를 치우는 것이 이 기능의 목적이라 죽은 몸도 열어 둔다.
         /// </summary>
         private bool IsCarryable(Damageable body)
         {
+            // 상자에 넣은 몸은 다시 집히지 않는다. 넣자마자 같은 키로 꺼내면 넣은 뜻이 없다.
+            if (Container.IsStashed(body)) return false;
+
             return body.IsDown || (carryDeadBodies && !body.IsAlive);
+        }
+
+        /// <summary>
+        /// 한순간에 끝나는 일은 글자가 없으면 키가 먹었는지 알 수 없다. 화면을 찾는 일은 한 번만 한다.
+        /// ControlsOverlay는 우리 담당이 아니라 부르기만 한다.
+        /// </summary>
+        private void Flash(string message)
+        {
+            if (_overlay == null) _overlay = FindAnyObjectByType<ByAWhisker.UI.ControlsOverlay>();
+            if (_overlay != null) _overlay.Flash(message);
         }
 
         private bool InTargetLayers(int layer)
@@ -272,7 +460,12 @@ namespace ByAWhisker.Combat
         private void OnRunReset()
         {
             if (IsCarrying) Drop();
+
+            // 상자 쪽도 스스로 플레이어를 내보내지만, 어느 쪽이 먼저 불리든 같은 결과가 되게 둘 다 한다.
+            ReleaseHiding();
+
             _target = null;
+            _container = null;
         }
 
         private static float HorizontalDistance(Vector3 a, Vector3 b)
@@ -288,6 +481,10 @@ namespace ByAWhisker.Combat
             // 집을 수 있는 거리는 눈에 안 보이니 씬에서 확인할 수 있게 그려 둔다.
             Gizmos.color = new Color(0.45f, 0.75f, 0.9f, 0.5f);
             Gizmos.DrawWireSphere(transform.position, range);
+
+            // 상자에 닿는 거리는 따로 둘 수 있으니 함께 그린다. 두 값이 어긋나면 여기서 바로 보인다.
+            Gizmos.color = new Color(0.9f, 0.76f, 0.45f, 0.5f);
+            Gizmos.DrawWireSphere(transform.position, containerRange);
         }
 #endif
     }

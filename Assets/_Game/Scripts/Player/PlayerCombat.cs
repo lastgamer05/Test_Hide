@@ -30,8 +30,11 @@ namespace ByAWhisker.Player
         /// <summary>지금 겨누고 있는 수평 방향. 화면 표시나 애니메이션이 읽어 갈 수 있다.</summary>
         public Vector3 AimDirection { get; private set; }
 
-        /// <summary>몸을 들고 있으면 두 손이 막힌다. 쏘지도, 쏘려고 몸을 돌리지도 않는다.</summary>
-        private bool Carrying { get { return carry != null && carry.IsCarrying; } }
+        /// <summary>
+        /// 두 손이 막힌 상태. 몸을 들고 있거나 상자 안에 숨어 있으면 쏘지도, 쏘려고 몸을 돌리지도 않는다.
+        /// 상자 안에서 총구 섬광이 터지면 숨은 뜻이 없어진다.
+        /// </summary>
+        private bool Carrying { get { return carry != null && (carry.IsCarrying || carry.IsHiding); } }
 
         private void Awake()
         {
@@ -123,11 +126,16 @@ namespace ByAWhisker.Player
             if (carry == null) return;
 
             bool dropping = carry.IsCarrying;
+            bool nearContainer = carry.HasContainer || carry.IsHiding;
             carry.Toggle();
 
             // 집기도 내려놓기도 한순간에 끝나서 글자가 없으면 키가 먹었는지 알 수 없다.
             if (_overlay == null) _overlay = FindAnyObjectByType<ByAWhisker.UI.ControlsOverlay>();
             if (_overlay == null) return;
+
+            // 상자가 얽힌 경우는 BodyCarry가 자기 사정에 맞는 글을 이미 띄웠다.
+            // 여기서 또 띄우면 한 프레임 뒤에 그것을 덮어써 엉뚱한 안내가 남는다.
+            if (nearContainer) return;
 
             if (dropping) _overlay.Flash("내려놓았다");
             else _overlay.Flash(carry.IsCarrying ? "몸을 들었다" : "쓰러진 몸 쪽으로 더 가까이");

@@ -28,6 +28,7 @@ namespace ByAWhisker.Perception
         private static readonly List<LightSource> _all = new List<LightSource>();
 
         private bool _isOn;
+        private bool _shown = true;
 
         /// <summary>등록된 램프 전체. 읽기 전용으로만 준다.</summary>
         public static IReadOnlyList<LightSource> All { get { return _all; } }
@@ -39,6 +40,22 @@ namespace ByAWhisker.Perception
             set
             {
                 _isOn = value;
+                ApplyToUnityLight();
+            }
+        }
+
+        /// <summary>
+        /// 보이는 조명만 켜고 끈다. 판정(IsOn, 밝기 계산)은 건드리지 않는다.
+        /// 플레이어가 못 보는 경비의 손전등은 기억한 어두운 곳에 희미한 불빛을 남겨 자리를 알려 주므로,
+        /// EnemyVisibility가 경비를 감출 때 이것도 끈다. 보이는 조명은 IsOn과 이 값이 둘 다 참일 때만 켜진다.
+        /// </summary>
+        public bool Shown
+        {
+            get { return _shown; }
+            set
+            {
+                if (_shown == value) return;
+                _shown = value;
                 ApplyToUnityLight();
             }
         }
@@ -83,7 +100,7 @@ namespace ByAWhisker.Perception
         private void ApplyToUnityLight()
         {
             // 판정과 보이는 그림이 어긋나면 디버깅이 괴로우니 한쪽에서만 상태를 쥔다.
-            if (unityLight != null) unityLight.enabled = _isOn;
+            if (unityLight != null) unityLight.enabled = _isOn && _shown;
         }
 
 #if UNITY_EDITOR

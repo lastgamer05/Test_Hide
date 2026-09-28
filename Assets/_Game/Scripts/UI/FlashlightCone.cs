@@ -69,6 +69,9 @@ namespace ByAWhisker.UI
         // 큐와 깊이 판정은 공유물의 성질이라 먼저 만드는 쪽의 값으로 정해진다.
         private static Material _sharedMaterial;
 
+        /// 시야 마스크로 자르는 전용 셰이더. 빌드에 들어가도록 Always Included Shaders에 올려 둔다.
+        public const string ConeShaderName = "ByAWhisker/FlashlightCone";
+
         private GameObject _object;
         private MeshRenderer _renderer;
         private Mesh _mesh;
@@ -309,9 +312,11 @@ namespace ByAWhisker.UI
             // 플레이 모드를 나가면 파괴되어 가짜 null이 된다. 그때 다시 만든다.
             if (_sharedMaterial != null) return _sharedMaterial;
 
-            // Internal-Colored를 먼저 찾는 이유는 이것만 _ZTest를 밖으로 열어 두기 때문이다.
-            // 벽에 가릴지 말지를 고를 수 있어야 한다. 없으면 AwarenessGauge와 같은 차례로 내려간다.
-            Shader shader = Shader.Find("Hidden/Internal-Colored");
+            // 전용 셰이더를 먼저 찾는다. 이것만 플레이어 시야 마스크로 부채꼴을 자른다 — 반투명 큐는
+            // 어둠 위에 그려지므로, 자르지 않으면 못 보는 곳의 빛이 떠서 벽 너머 경비의 자리를 다 알려 준다.
+            // 없으면 Internal-Colored(_ZTest를 밖으로 열어 둔 것)부터 AwarenessGauge와 같은 차례로 내려간다.
+            Shader shader = Shader.Find(ConeShaderName);
+            if (shader == null) shader = Shader.Find("Hidden/Internal-Colored");
             if (shader == null) shader = Shader.Find("Sprites/Default");
             if (shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
             if (shader == null) shader = Shader.Find("Unlit/Color");

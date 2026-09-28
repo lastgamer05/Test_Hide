@@ -18,6 +18,7 @@ namespace ByAWhisker.Visibility
         [SerializeField] private float hideDelay = 0.2f;
 
         private Renderer[] _renderers;
+        private Perception.LightSource[] _lights;
         private float _nextCheck;
         private float _hideAt;
         private bool _visible = true;
@@ -33,6 +34,10 @@ namespace ByAWhisker.Visibility
         private void Awake()
         {
             _renderers = GetComponentsInChildren<Renderer>(true);
+
+            // 든 손전등의 조명도 사람과 같이 감춘다. 판정은 그대로 두고 보이는 빛만 끈다.
+            // 안 끄면 못 보는 곳에서도 기억한 바닥에 불빛이 움직여 벽 너머 경비의 자리가 드러난다.
+            _lights = GetComponentsInChildren<Perception.LightSource>(true);
         }
 
         private void Update()
@@ -65,6 +70,11 @@ namespace ByAWhisker.Visibility
             for (int i = 0; i < _renderers.Length; i++)
             {
                 if (_renderers[i] != null) _renderers[i].enabled = value;
+            }
+
+            for (int i = 0; i < _lights.Length; i++)
+            {
+                if (_lights[i] != null) _lights[i].Shown = value;
             }
         }
     }

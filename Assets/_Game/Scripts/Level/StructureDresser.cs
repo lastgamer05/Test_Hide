@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ByAWhisker.Cameras;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -37,6 +38,9 @@ namespace ByAWhisker.Level
 
         [Tooltip("벽이 아닌 칸 전부에 바닥을 깐다. 판정용 바닥을 끄면 엄폐 칸 밑이 비어 소품 틈으로 허공이 보인다.")]
         [SerializeField] private bool floorUnderCover = true;
+
+        [Tooltip("벽 칸 밑에도 바닥을 깐다. 카메라를 가린 벽이 반투명해지면 벽 속이 보이는데, 판정용 바닥을 꺼 둬서 그 자리가 검게 뚫린다.")]
+        [SerializeField] private bool floorUnderWalls = true;
 
         [Header("벽 판")]
         [Tooltip("평범한 벽 판. 걸을 수 있는 칸을 바라보는 면마다 하나를 고른다.")]
@@ -119,7 +123,38 @@ namespace ByAWhisker.Level
         private GridMap _dressedGrid;
         private readonly List<Mesh> _ownedMeshes = new List<Mesh>();
         private readonly Dictionary<GameObject, Piece> _pieces = new Dictionary<GameObject, Piece>();
-        private readonly Dictionary<Material, List<CombineInstance>> _batches = new Dictionary<Material, List<CombineInstance>>();
+        private readonly Dictionary<BatchKey, List<CombineInstance>> _batches = new Dictionary<BatchKey, List<CombineInstance>>();
+
+        /// 바닥처럼 어느 벽 상자에도 속하지 않는 옷의 묶음 번호.
+        private const int SharedGroup = -1;
+
+        /// 지금 쌓는 조각이 들어갈 묶음. 벽 옷은 판정 벽 상자(한 행에서 이어진 벽 칸)마다 따로 묶어야
+        /// 카메라를 가린 벽만 골라 비출 수 있다. 맵 전체를 한 메시로 합치면 비출 단위가 사라진다.
+        private int _group = SharedGroup;
+
+        /// 벽 칸마다 그 칸이 속한 판정 상자의 첫 열. 벽이 아니면 -1.
+        private int[] _runStart;
+
+        private struct BatchKey : System.IEquatable<BatchKey>
+        {
+            public int group;
+            public Material material;
+
+            public bool Equals(BatchKey other)
+            {
+                return group == other.group && material == other.material;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is BatchKey && Equals((BatchKey)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return group * 397 ^ (material != null ? material.GetInstanceID() : 0);
+            }
+        }
 
         private struct Part
         {
@@ -182,6 +217,9 @@ namespace ByAWhisker.Level
             Material wallBoxMaterial;
             FindCollisionBoxMesh(levelRoot, out cubeMesh, out wallBoxMaterial);
 
+            ComputeRunStarts(grid);
+
+            _group = SharedGroup;
             bool floorDressed = DressFloor(grid);
             bool wallsDressed = DressWalls(grid, levelBuilder.Map.wallHeight);
             if (wallsDressed)
@@ -191,7 +229,7 @@ namespace ByAWhisker.Level
                 DressWallCaps(grid, levelBuilder.Map.wallHeight, cubeMesh, capMaterial);
             }
 
-            CombineBatches();
+            CombineBatches(levelRoot, grid);
 
             // 모델이 비어 입히지 못한 쪽은 판정 상자를 켜 둔다. 끄면 그 자리가 허공이 된다.
             HideCollisionRenderers(levelRoot, floorDressed, wallsDressed);
@@ -241,7 +279,7 @@ namespace ByAWhisker.Level
                 for (int col = 0; col < grid.Cols; col++)
                 {
                     CellType type = grid.At(col, row);
-                    if (type == CellType.Wall) continue;
+                    if (!floorUnderWalls && type == CellType.Wall) continue;
                     if (!floorUnderCover && IsCover(type)) continue;
 
                     bool accent = Random01(Hash(col, row, SaltFloorAccent)) < floorAccentChance;
@@ -301,6 +339,7 @@ namespace ByAWhisker.Level
                         Vector3 center = grid.CellCenter(col, row) + outward * (cell * 0.5f - thickness * 0.5f);
 
                         float yaw = Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg + faceYawOffset;
+                        _group = WallGroup(grid, col, row);
                         AddPiece(piece, center, 0f, yaw, scale);
                         any = true;
                     }
@@ -351,6 +390,8 @@ namespace ByAWhisker.Level
                             && QuadrantIsOpen(grid, vc, vr, next))
                         {
                             // 튀어나온 모서리: 벽 칸 쪽으로 넣되 판 앞면보다 조금 나오게.
+                            Vector2Int wall = QuadrantCell(vc, vr, q);
+                            _group = WallGroup(grid, wall.x, wall.y);
                             PlaceCorner(outer, vertex + toQuadrant * inset, q, wallHeight);
                         }
                         else if (wallCount == 3
@@ -359,6 +400,8 @@ namespace ByAWhisker.Level
                                  && QuadrantIsWall(grid, vc, vr, next))
                         {
                             // 들어간 모서리: 빈 칸의 맞은편 벽 칸 쪽으로 넣는다.
+                            Vector2Int wall = QuadrantCell(vc, vr, prev);
+                            _group = WallGroup(grid, wall.x, wall.y);
                             PlaceCorner(inner, vertex - toQuadrant * inset, q, wallHeight);
                         }
                     }
@@ -406,6 +449,7 @@ namespace ByAWhisker.Level
                         (row + 0.5f) * cell);
                     var size = new Vector3((end - col + 1) * cell, wallCapThickness, cell);
 
+                    _group = WallGroup(grid, col, row);
                     AddInstance(material, cubeMesh, 0, Matrix4x4.TRS(center, Quaternion.identity, size));
                     col = end + 1;
                 }
@@ -432,28 +476,38 @@ namespace ByAWhisker.Level
 
         private void AddInstance(Material material, Mesh mesh, int subMesh, Matrix4x4 matrix)
         {
+            var key = new BatchKey { group = _group, material = material };
             List<CombineInstance> list;
-            if (!_batches.TryGetValue(material, out list))
+            if (!_batches.TryGetValue(key, out list))
             {
-                list = new List<CombineInstance>(256);
-                _batches.Add(material, list);
+                list = new List<CombineInstance>(_group == SharedGroup ? 256 : 16);
+                _batches.Add(key, list);
             }
 
             list.Add(new CombineInstance { mesh = mesh, subMeshIndex = subMesh, transform = matrix });
         }
 
         /// <summary>
-        /// 재질마다 메시 하나로 합친다. 바닥 타일만 600장이 넘고, 런타임에 만든 것은 정적 배칭이
+        /// 묶음과 재질마다 메시 하나로 합친다. 바닥 타일만 600장이 넘고, 런타임에 만든 것은 정적 배칭이
         /// 저절로 먹지 않아 그대로 두면 그리기 호출이 타일 수만큼 나간다.
+        /// 벽 옷은 판정 벽 상자마다 따로 합치고, 그 상자에 대리인을 붙여 카메라가 가린 벽을 찾아오게 한다.
         /// </summary>
-        private void CombineBatches()
+        private void CombineBatches(Transform levelRoot, GridMap grid)
         {
-            foreach (KeyValuePair<Material, List<CombineInstance>> batch in _batches)
+            Dictionary<string, Transform> wallBoxes = CollectWallBoxes(levelRoot);
+
+            foreach (KeyValuePair<BatchKey, List<CombineInstance>> batch in _batches)
             {
                 if (batch.Value.Count == 0) continue;
 
+                Material material = batch.Key.material;
+                int group = batch.Key.group;
+                string boxName = group == SharedGroup
+                    ? null
+                    : LevelBuilder.RunName(CellType.Wall, group / grid.Cols, group % grid.Cols);
+
                 var mesh = new Mesh();
-                mesh.name = "StructureDressing_" + batch.Key.name;
+                mesh.name = "StructureDressing_" + (boxName != null ? boxName + "_" : "") + material.name;
 
                 // 판과 타일을 다 합치면 정점이 65535를 쉽게 넘는다.
                 mesh.indexFormat = IndexFormat.UInt32;
@@ -466,12 +520,72 @@ namespace ByAWhisker.Level
                 go.AddComponent<MeshFilter>().sharedMesh = mesh;
 
                 MeshRenderer renderer = go.AddComponent<MeshRenderer>();
-                renderer.sharedMaterial = batch.Key;
+                renderer.sharedMaterial = material;
                 renderer.shadowCastingMode = ShadowCastingMode.On;
                 renderer.receiveShadows = true;
+
+                Transform box;
+                if (boxName != null && wallBoxes.TryGetValue(boxName, out box))
+                {
+                    OcclusionProxy proxy = box.GetComponent<OcclusionProxy>();
+                    if (proxy == null) proxy = box.gameObject.AddComponent<OcclusionProxy>();
+                    proxy.Add(renderer);
+                }
             }
 
             _batches.Clear();
+        }
+
+        /// <summary>판정 벽 상자를 이름으로 모은다. 다시 입힐 때를 위해 붙어 있던 대리인은 비운다.</summary>
+        private static Dictionary<string, Transform> CollectWallBoxes(Transform levelRoot)
+        {
+            var boxes = new Dictionary<string, Transform>();
+            int wallLayer = LayerMask.NameToLayer(LevelBuilder.WallLayer);
+
+            for (int i = 0; i < levelRoot.childCount; i++)
+            {
+                Transform child = levelRoot.GetChild(i);
+                if (wallLayer >= 0 && child.gameObject.layer != wallLayer) continue;
+
+                OcclusionProxy proxy = child.GetComponent<OcclusionProxy>();
+                if (proxy != null) proxy.Clear();
+                boxes[child.name] = child;
+            }
+
+            return boxes;
+        }
+
+        private void ComputeRunStarts(GridMap grid)
+        {
+            int count = grid.Cols * grid.Rows;
+            if (_runStart == null || _runStart.Length != count) _runStart = new int[count];
+
+            for (int row = 0; row < grid.Rows; row++)
+            {
+                int start = -1;
+                for (int col = 0; col < grid.Cols; col++)
+                {
+                    if (grid.At(col, row) == CellType.Wall)
+                    {
+                        if (start < 0) start = col;
+                    }
+                    else
+                    {
+                        start = -1;
+                    }
+
+                    _runStart[row * grid.Cols + col] = start;
+                }
+            }
+        }
+
+        /// 벽 칸이 속한 판정 상자의 묶음 번호. 격자 밖이나 벽이 아니면 공용 묶음.
+        private int WallGroup(GridMap grid, int col, int row)
+        {
+            if (!grid.Inside(col, row)) return SharedGroup;
+
+            int start = _runStart[row * grid.Cols + col];
+            return start < 0 ? SharedGroup : row * grid.Cols + start;
         }
 
         /// <summary>

@@ -266,12 +266,18 @@ namespace ByAWhisker.Level
                 (row + 0.5f) * cell);
 
             CreateBox(
-                type + "_r" + row + "_c" + fromCol,
+                RunName(type, row, fromCol),
                 parent,
                 center,
                 new Vector3(width, height, cell),
                 MaterialOf(type),
                 LayerOf(type));
+        }
+
+        /// <summary>한 행에서 이어진 칸을 합친 판정 상자의 이름. 옷을 입히는 쪽이 이 이름으로 상자를 찾는다.</summary>
+        public static string RunName(CellType type, int row, int fromCol)
+        {
+            return type + "_r" + row + "_c" + fromCol;
         }
 
         private static GameObject CreateBox(string name, Transform parent, Vector3 center, Vector3 size, Material material, string layerName)

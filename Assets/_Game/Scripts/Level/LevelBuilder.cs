@@ -14,6 +14,9 @@ namespace ByAWhisker.Level
         public const string HighCoverLayer = "HighCover";
         public const string LowCoverLayer = "LowCover";
 
+        /// 램프만의 레이어. 총알에는 걸리되 시야와 엄폐 판정에는 끼지 않아야 해서 벽 레이어를 빌리지 않는다.
+        public const string LampLayer = "Lamp";
+
         [SerializeField] private LevelMapAsset map;
         [Tooltip("생성물이 들어갈 부모. 비우면 이 오브젝트 밑에 만든다.")]
         [SerializeField] private Transform root;
@@ -102,6 +105,10 @@ namespace ByAWhisker.Level
             lamp.transform.SetParent(parent, false);
             lamp.transform.localPosition = cellCenter + Vector3.up * map.lampHeight;
 
+            // 총알이 걸리는 레이어에 올려야 쏴서 깰 수 있다. Wall이나 HighCover를 빌리면
+            // 램프가 시야와 엄폐 판정까지 막아서 지도가 달라진다.
+            lamp.layer = ResolveLayer(LampLayer);
+
             Light light = lamp.AddComponent<Light>();
             light.type = LightType.Point;
             light.range = map.lampRange;
@@ -119,6 +126,20 @@ namespace ByAWhisker.Level
             bulb.transform.SetParent(lamp.transform, false);
             bulb.transform.localScale = Vector3.one * 0.32f;
             if (map.lampMaterial != null) bulb.GetComponent<MeshRenderer>().sharedMaterial = map.lampMaterial;
+
+            // 맞을 자리. 총알은 총구 높이에서 수평으로만 나가므로 천장의 전구에 콜라이더를 달면
+            // 영원히 안 맞는다. 바닥에서 전구까지 세운 기둥으로 받는다. 굵기는 지나는 길을
+            // 막지 않을 만큼만 준다. 트리거가 아니어야 총알이 본다.
+            CapsuleCollider hit = lamp.AddComponent<CapsuleCollider>();
+            hit.radius = 0.14f;
+            hit.height = map.lampHeight;
+            hit.center = new Vector3(0f, -map.lampHeight * 0.5f, 0f);
+
+            // 붙이는 순서에 뜻이 있다. Damageable은 Awake에서 자기 밑의 콜라이더를 한 번만 모으고,
+            // Lamp는 Awake에서 그 Damageable의 Damaged를 구독한다.
+            // 그래서 콜라이더 → Damageable → Lamp 순이어야 셋이 다 이어진다.
+            lamp.AddComponent<Combat.Damageable>();
+            lamp.AddComponent<Lamp>();
         }
 
         private void CreateKey(Transform parent, Vector3 cellCenter)

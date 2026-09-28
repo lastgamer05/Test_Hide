@@ -242,6 +242,7 @@ GameObject:
   - component: {fileID: 44326767}
   - component: {fileID: 44326769}
   - component: {fileID: 44326768}
+  - component: {fileID: 44326770}
   m_Layer: 0
   m_Name: Flashlight
   m_TagString: Untagged
@@ -346,6 +347,28 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &44326770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 44326766}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 809d2cd6cd72c394a8393b44f976b9c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
+  source: {fileID: 0}
+  segments: 24
+  groundHeight: 0.06
+  beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
+  strength: 0.55
+  edgeSoftness: 0.55
+  rimAlpha: 0.12
+  coneMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &51398236
 GameObject:
   m_ObjectHideFlags: 0
@@ -357,6 +380,7 @@ GameObject:
   - component: {fileID: 51398237}
   - component: {fileID: 51398239}
   - component: {fileID: 51398238}
+  - component: {fileID: 51398240}
   m_Layer: 0
   m_Name: Flashlight
   m_TagString: Untagged
@@ -461,6 +485,28 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &51398240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 51398236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 809d2cd6cd72c394a8393b44f976b9c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
+  source: {fileID: 0}
+  segments: 24
+  groundHeight: 0.06
+  beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
+  strength: 0.55
+  edgeSoftness: 0.55
+  rimAlpha: 0.12
+  coneMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &62040829
 GameObject:
   m_ObjectHideFlags: 0
@@ -4543,6 +4589,7 @@ GameObject:
   - component: {fileID: 399261845}
   - component: {fileID: 399261847}
   - component: {fileID: 399261846}
+  - component: {fileID: 399261848}
   m_Layer: 0
   m_Name: Flashlight
   m_TagString: Untagged
@@ -4647,6 +4694,28 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &399261848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 399261844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 809d2cd6cd72c394a8393b44f976b9c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
+  source: {fileID: 0}
+  segments: 24
+  groundHeight: 0.06
+  beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
+  strength: 0.55
+  edgeSoftness: 0.55
+  rimAlpha: 0.12
+  coneMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &412211039
 GameObject:
   m_ObjectHideFlags: 0
@@ -5851,6 +5920,7 @@ GameObject:
   - component: {fileID: 489099425}
   - component: {fileID: 489099427}
   - component: {fileID: 489099426}
+  - component: {fileID: 489099428}
   m_Layer: 0
   m_Name: Flashlight
   m_TagString: Untagged
@@ -5955,6 +6025,28 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &489099428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 489099424}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 809d2cd6cd72c394a8393b44f976b9c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
+  source: {fileID: 0}
+  segments: 24
+  groundHeight: 0.06
+  beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
+  strength: 0.55
+  edgeSoftness: 0.55
+  rimAlpha: 0.12
+  coneMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &490735472
 GameObject:
   m_ObjectHideFlags: 0
@@ -7558,6 +7650,7 @@ GameObject:
   - component: {fileID: 602878561}
   - component: {fileID: 602878563}
   - component: {fileID: 602878562}
+  - component: {fileID: 602878564}
   m_Layer: 0
   m_Name: Flashlight
   m_TagString: Untagged
@@ -7662,6 +7755,28 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &602878564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 602878560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 809d2cd6cd72c394a8393b44f976b9c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
+  source: {fileID: 0}
+  segments: 24
+  groundHeight: 0.06
+  beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
+  strength: 0.55
+  edgeSoftness: 0.55
+  rimAlpha: 0.12
+  coneMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &606927173
 GameObject:
   m_ObjectHideFlags: 0
@@ -8220,6 +8335,7 @@ GameObject:
   - component: {fileID: 665058699}
   - component: {fileID: 665058701}
   - component: {fileID: 665058700}
+  - component: {fileID: 665058702}
   m_Layer: 0
   m_Name: Flashlight
   m_TagString: Untagged
@@ -8324,6 +8440,28 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &665058702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 665058698}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 809d2cd6cd72c394a8393b44f976b9c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
+  source: {fileID: 0}
+  segments: 24
+  groundHeight: 0.06
+  beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
+  strength: 0.55
+  edgeSoftness: 0.55
+  rimAlpha: 0.12
+  coneMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &674498129
 GameObject:
   m_ObjectHideFlags: 0
@@ -12243,6 +12381,7 @@ GameObject:
   - component: {fileID: 996652058}
   - component: {fileID: 996652060}
   - component: {fileID: 996652059}
+  - component: {fileID: 996652061}
   m_Layer: 0
   m_Name: Flashlight
   m_TagString: Untagged
@@ -12347,6 +12486,28 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &996652061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 996652057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 809d2cd6cd72c394a8393b44f976b9c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
+  source: {fileID: 0}
+  segments: 24
+  groundHeight: 0.06
+  beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
+  strength: 0.55
+  edgeSoftness: 0.55
+  rimAlpha: 0.12
+  coneMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &998686379
 GameObject:
   m_ObjectHideFlags: 0
@@ -14474,7 +14635,7 @@ MonoBehaviour:
   m_Center: {x: 0, y: 2, z: 0}
   m_LayerMask:
     serializedVersion: 2
-    m_Bits: 4294955007
+    m_Bits: 4294938623
   m_UseGeometry: 1
   m_DefaultArea: 0
   m_GenerateLinks: 0
@@ -16200,6 +16361,7 @@ GameObject:
   - component: {fileID: 1314556676}
   - component: {fileID: 1314556675}
   - component: {fileID: 1314556677}
+  - component: {fileID: 1314556678}
   m_Layer: 0
   m_Name: Flashlight
   m_TagString: Untagged
@@ -16333,6 +16495,28 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!114 &1314556678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1314556673}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 809d2cd6cd72c394a8393b44f976b9c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
+  source: {fileID: 0}
+  segments: 24
+  groundHeight: 0.06
+  beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
+  strength: 0.55
+  edgeSoftness: 0.55
+  rimAlpha: 0.12
+  coneMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &1320602831
 GameObject:
   m_ObjectHideFlags: 0
@@ -20370,6 +20554,7 @@ GameObject:
   - component: {fileID: 1620245821}
   - component: {fileID: 1620245823}
   - component: {fileID: 1620245822}
+  - component: {fileID: 1620245824}
   m_Layer: 0
   m_Name: Flashlight
   m_TagString: Untagged
@@ -20474,6 +20659,28 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1620245824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1620245820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 809d2cd6cd72c394a8393b44f976b9c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
+  source: {fileID: 0}
+  segments: 24
+  groundHeight: 0.06
+  beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
+  strength: 0.55
+  edgeSoftness: 0.55
+  rimAlpha: 0.12
+  coneMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &1626360168
 GameObject:
   m_ObjectHideFlags: 0
@@ -21708,6 +21915,7 @@ GameObject:
   - component: {fileID: 1760233101}
   - component: {fileID: 1760233103}
   - component: {fileID: 1760233102}
+  - component: {fileID: 1760233104}
   m_Layer: 0
   m_Name: Flashlight
   m_TagString: Untagged
@@ -21812,6 +22020,28 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1760233104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1760233100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 809d2cd6cd72c394a8393b44f976b9c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
+  source: {fileID: 0}
+  segments: 24
+  groundHeight: 0.06
+  beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
+  strength: 0.55
+  edgeSoftness: 0.55
+  rimAlpha: 0.12
+  coneMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &1778806361
 GameObject:
   m_ObjectHideFlags: 0
@@ -22021,6 +22251,7 @@ GameObject:
   - component: {fileID: 1812867594}
   - component: {fileID: 1812867596}
   - component: {fileID: 1812867595}
+  - component: {fileID: 1812867597}
   m_Layer: 0
   m_Name: Flashlight
   m_TagString: Untagged
@@ -22125,6 +22356,28 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1812867597
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1812867593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 809d2cd6cd72c394a8393b44f976b9c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
+  source: {fileID: 0}
+  segments: 24
+  groundHeight: 0.06
+  beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
+  strength: 0.55
+  edgeSoftness: 0.55
+  rimAlpha: 0.12
+  coneMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &1832132296
 GameObject:
   m_ObjectHideFlags: 0
@@ -23996,6 +24249,7 @@ GameObject:
   - component: {fileID: 1973954555}
   - component: {fileID: 1973954557}
   - component: {fileID: 1973954556}
+  - component: {fileID: 1973954558}
   m_Layer: 0
   m_Name: Flashlight
   m_TagString: Untagged
@@ -24100,6 +24354,28 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1973954558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1973954554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 809d2cd6cd72c394a8393b44f976b9c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.UI.FlashlightCone
+  source: {fileID: 0}
+  segments: 24
+  groundHeight: 0.06
+  beamColor: {r: 1, g: 0.94, b: 0.72, a: 0.5}
+  strength: 0.55
+  edgeSoftness: 0.55
+  rimAlpha: 0.12
+  coneMaterial: {fileID: 0}
+  renderQueue: 3100
+  depthTest: 1
 --- !u!1 &1983892544
 GameObject:
   m_ObjectHideFlags: 0
@@ -25964,6 +26240,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2612988849310483947, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3792751515875511893}
+    - targetCorrespondingSourceObject: {fileID: 2612988849310483947, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3792751515875511894}
   m_SourcePrefab: {fileID: 100100000, guid: 9fddb4b594676404391617842d8e4b4a, type: 3}
 --- !u!1 &3792751515875511879 stripped
 GameObject:
@@ -26158,7 +26437,7 @@ MonoBehaviour:
   settings: {fileID: 11400000, guid: dcad055d689aade4b8bb5233d7a1c135, type: 2}
   hitMask:
     serializedVersion: 2
-    m_Bits: 15872
+    m_Bits: 32256
   suppressedNoiseScale: 0.15
   noise: {fileID: 0}
 --- !u!114 &3792751515875511892
@@ -26205,6 +26484,38 @@ MonoBehaviour:
   view: {fileID: 702343078}
   enterSpeed: 10
   exitSpeed: 4
+--- !u!114 &3792751515875511894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3792751515875511879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfe0c1ed74af6804c9149e342104cd10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Player.ThrowAction
+  input: {fileID: 0}
+  combat: {fileID: 0}
+  stance: {fileID: 0}
+  stoneCount: 3
+  handHeight: 1.35
+  crouchHandScale: 0.6
+  throwSpeed: 13
+  throwDistance: 13
+  arcHeight: 1.5
+  groundClearance: 0.12
+  blockingLayers:
+    serializedVersion: 2
+    m_Bits: 3584
+  stoneRadius: 0.1
+  noiseLoudness: 0.6
+  noiseRadius: 9
+  stoneSize: 0.14
+  stoneColor: {r: 0.94, g: 0.9, b: 0.74, a: 1}
+  stoneMaterial: {fileID: 0}
+  renderQueue: 3100
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -49,7 +49,10 @@ namespace ByAWhisker.AI
                     if (points[i] != null) _resolved.Add(points[i]);
                 }
             }
-            else
+
+            // 지점을 지우고 새로 만들면 목록에는 끊긴 참조만 남는다. 그대로 두면 경비가 순찰을 안 하고
+            // 시작 자리에 굳으니, 살아 있는 지점이 하나도 없으면 자식으로 돌아간다.
+            if (_resolved.Count == 0)
             {
                 for (int i = 0; i < transform.childCount; i++)
                 {

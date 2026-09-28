@@ -126,10 +126,18 @@ namespace ByAWhisker.Core
 
             if (playerExposure == null) playerExposure = player.GetComponent<PlayerExposure>();
 
+            GridMap grid = Grid;
             GuardPerception[] guards = FindObjectsByType<GuardPerception>(FindObjectsSortMode.None);
             for (int i = 0; i < guards.Length; i++)
             {
                 guards[i].Bind(player, playerExposure);
+
+                // 지도를 고치다 보면 경비 자리가 블록 안에 묻힌다. Warp가 가장 가까운 바닥으로 옮겨 주긴 하지만
+                // 의도한 자리가 아니므로 씬을 고치라고 알린다.
+                if (grid != null && GridMap.BlocksMovement(grid.At(guards[i].transform.position)))
+                {
+                    Debug.LogWarning(guards[i].name + "의 시작 자리가 막힌 칸 안이다. 씬에서 빈 칸으로 옮겨라.", guards[i]);
+                }
 
                 GuardMotor motor = guards[i].GetComponent<GuardMotor>();
                 if (motor != null) motor.Warp(guards[i].transform.position, guards[i].transform.rotation);

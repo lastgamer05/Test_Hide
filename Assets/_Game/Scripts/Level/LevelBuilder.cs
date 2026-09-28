@@ -1,4 +1,5 @@
 using UnityEngine;
+using Unity.AI.Navigation;
 
 namespace ByAWhisker.Level
 {
@@ -16,6 +17,9 @@ namespace ByAWhisker.Level
 
         /// 램프만의 레이어. 총알에는 걸리되 시야와 엄폐 판정에는 끼지 않아야 해서 벽 레이어를 빌리지 않는다.
         public const string LampLayer = "Lamp";
+
+        /// 내장 NavMesh 영역 번호. 0 Walkable, 1 Not Walkable, 2 Jump.
+        private const int NotWalkableArea = 1;
 
         [SerializeField] private LevelMapAsset map;
         [Tooltip("생성물이 들어갈 부모. 비우면 이 오브젝트 밑에 만든다.")]
@@ -214,7 +218,14 @@ namespace ByAWhisker.Level
             for (int i = parent.childCount - 1; i >= 0; i--)
             {
                 GameObject child = parent.GetChild(i).gameObject;
-                if (Application.isPlaying) Destroy(child);
+                if (Application.isPlaying)
+                {
+                    // Destroy는 프레임 끝에 지운다. 같은 Awake에서 NavMesh를 구우면 씬에 저장돼 있던
+                    // 옛 상자까지 같이 구워져 새 지도의 길을 막는다. 먼저 꺼서 루트 밖으로 뺀다.
+                    child.SetActive(false);
+                    child.transform.SetParent(null, false);
+                    Destroy(child);
+                }
                 else DestroyImmediate(child);
             }
         }
@@ -265,13 +276,27 @@ namespace ByAWhisker.Level
                 height * 0.5f,
                 (row + 0.5f) * cell);
 
-            CreateBox(
+            GameObject box = CreateBox(
                 RunName(type, row, fromCol),
                 parent,
                 center,
                 new Vector3(width, height, cell),
                 MaterialOf(type),
                 LayerOf(type));
+
+            MarkNotWalkable(box);
+        }
+
+        /// <summary>
+        /// 블록 윗면을 NavMesh에서 뺀다. 그냥 두면 복셀이 잘아서 1.5m 엄폐물 위에도 걸을 수 있는 섬이 구워지고,
+        /// Warp나 SamplePosition이 그 섬을 가장 가까운 자리로 골라 경비를 엄폐물 위에 세운다.
+        /// 모양은 그대로 구워지므로 밑의 바닥은 여전히 막힌다.
+        /// </summary>
+        private static void MarkNotWalkable(GameObject box)
+        {
+            NavMeshModifier modifier = box.AddComponent<NavMeshModifier>();
+            modifier.overrideArea = true;
+            modifier.area = NotWalkableArea;
         }
 
         /// <summary>한 행에서 이어진 칸을 합친 판정 상자의 이름. 옷을 입히는 쪽이 이 이름으로 상자를 찾는다.</summary>

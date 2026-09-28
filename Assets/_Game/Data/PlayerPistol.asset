@@ -15,8 +15,9 @@ MonoBehaviour:
   range: 11
   spreadDegrees: 2
   fireInterval: 0.45
-  magazine: 6
-  reserveAmmo: 6
+  magazine: 3
+  reserveAmmo: 0
   reloadSeconds: 1.8
-  suppressed: 1
-  noiseLoudness: 0.9
+  suppressed: 0
+  noiseLoudness: 1
+  noiseRadius: 30

@@ -119,6 +119,85 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &1292635
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1292636}
+  - component: {fileID: 1292638}
+  - component: {fileID: 1292637}
+  m_Layer: 0
+  m_Name: Ammo_c38_r9
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1292636
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1292635}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 77, y: 0, z: 19}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1641422712}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1292637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1292635}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f6aa8ba01c3660459818e0dd0840207, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.AmmoPickup
+  amount: 2
+  triggerRadius: 0.8
+  triggerHeight: 0.9
+  visual: {fileID: 0}
+  visualPrefab: {fileID: 0}
+  boxSize: {x: 0.35, y: 0.22, z: 0.26}
+  boxMaterial: {fileID: 0}
+  boxColor: {r: 1, g: 0.72, b: 0.2, a: 1}
+  hoverHeight: 0.45
+  bobAmplitude: 0.06
+  bobPeriod: 1.6
+  spinDegreesPerSecond: 60
+  flashFormat: "\uD0C4\uC57D +{0}"
+--- !u!135 &1292638
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1292635}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.8
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!1 &32245817
 GameObject:
   m_ObjectHideFlags: 0
@@ -858,6 +937,85 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 101580871}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &104778027
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 104778028}
+  - component: {fileID: 104778030}
+  - component: {fileID: 104778029}
+  m_Layer: 0
+  m_Name: Ammo_c38_r1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &104778028
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104778027}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 77, y: 0, z: 3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1641422712}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &104778029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104778027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f6aa8ba01c3660459818e0dd0840207, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.AmmoPickup
+  amount: 2
+  triggerRadius: 0.8
+  triggerHeight: 0.9
+  visual: {fileID: 0}
+  visualPrefab: {fileID: 0}
+  boxSize: {x: 0.35, y: 0.22, z: 0.26}
+  boxMaterial: {fileID: 0}
+  boxColor: {r: 1, g: 0.72, b: 0.2, a: 1}
+  hoverHeight: 0.45
+  bobAmplitude: 0.06
+  bobPeriod: 1.6
+  spinDegreesPerSecond: 60
+  flashFormat: "\uD0C4\uC57D +{0}"
+--- !u!135 &104778030
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104778027}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.8
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!1 &106722268
 GameObject:
   m_ObjectHideFlags: 0
@@ -1555,6 +1713,7 @@ MonoBehaviour:
   shoutLoudness: 1
   shoutRadius: 12
   shoutCooldown: 6
+  flashlights: []
 --- !u!114 &148518680
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2249,7 +2408,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c2dfe70bdb3ac94f8f1901d88365585, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.PatrolRoute
-  waitSeconds: 1.2
+  waitSeconds: 0.6
   points: []
   gizmoColor: {r: 0.4, g: 0.9, b: 1, a: 1}
 --- !u!4 &228909564
@@ -3301,6 +3460,7 @@ MonoBehaviour:
   shoutLoudness: 1
   shoutRadius: 12
   shoutCooldown: 6
+  flashlights: []
 --- !u!114 &314515678
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5613,12 +5773,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c2dfe70bdb3ac94f8f1901d88365585, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.PatrolRoute
-  waitSeconds: 1.2
-  points:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  waitSeconds: 0.6
+  points: []
   gizmoColor: {r: 0.4, g: 0.9, b: 1, a: 1}
 --- !u!1 &485055770
 GameObject:
@@ -6159,6 +6315,7 @@ MonoBehaviour:
   shoutLoudness: 1
   shoutRadius: 12
   shoutCooldown: 6
+  flashlights: []
 --- !u!114 &490735484
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6847,7 +7004,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c2dfe70bdb3ac94f8f1901d88365585, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.PatrolRoute
-  waitSeconds: 1.2
+  waitSeconds: 0.6
   points: []
   gizmoColor: {r: 0.4, g: 0.9, b: 1, a: 1}
 --- !u!4 &544188798
@@ -7173,7 +7330,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c2dfe70bdb3ac94f8f1901d88365585, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.PatrolRoute
-  waitSeconds: 1.2
+  waitSeconds: 0.6
   points: []
   gizmoColor: {r: 0.4, g: 0.9, b: 1, a: 1}
 --- !u!4 &575413121
@@ -8911,6 +9068,7 @@ MonoBehaviour:
   shoutLoudness: 1
   shoutRadius: 12
   shoutCooldown: 6
+  flashlights: []
 --- !u!114 &700787262
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10283,6 +10441,7 @@ MonoBehaviour:
   shoutLoudness: 1
   shoutRadius: 12
   shoutCooldown: 6
+  flashlights: []
 --- !u!114 &828106303
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10616,7 +10775,7 @@ Transform:
   m_GameObject: {fileID: 883909874}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 61, y: 0, z: 41}
+  m_LocalPosition: {x: 63, y: 0, z: 41}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -10831,6 +10990,7 @@ MonoBehaviour:
   shoutLoudness: 1
   shoutRadius: 12
   shoutCooldown: 6
+  flashlights: []
 --- !u!114 &883909886
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11025,7 +11185,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c2dfe70bdb3ac94f8f1901d88365585, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.PatrolRoute
-  waitSeconds: 1.2
+  waitSeconds: 0.6
   points: []
   gizmoColor: {r: 0.4, g: 0.9, b: 1, a: 1}
 --- !u!4 &903834326
@@ -11095,11 +11255,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c2dfe70bdb3ac94f8f1901d88365585, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.PatrolRoute
-  waitSeconds: 1.2
-  points:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  waitSeconds: 0.6
+  points: []
   gizmoColor: {r: 0.4, g: 0.9, b: 1, a: 1}
 --- !u!1 &908754443
 GameObject:
@@ -11925,6 +12082,85 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1349541171}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &968401536
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 968401537}
+  - component: {fileID: 968401539}
+  - component: {fileID: 968401538}
+  m_Layer: 0
+  m_Name: Ammo_c1_r4
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &968401537
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 968401536}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3, y: 0, z: 9}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1641422712}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &968401538
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 968401536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f6aa8ba01c3660459818e0dd0840207, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.AmmoPickup
+  amount: 2
+  triggerRadius: 0.8
+  triggerHeight: 0.9
+  visual: {fileID: 0}
+  visualPrefab: {fileID: 0}
+  boxSize: {x: 0.35, y: 0.22, z: 0.26}
+  boxMaterial: {fileID: 0}
+  boxColor: {r: 1, g: 0.72, b: 0.2, a: 1}
+  hoverHeight: 0.45
+  bobAmplitude: 0.06
+  bobPeriod: 1.6
+  spinDegreesPerSecond: 60
+  flashFormat: "\uD0C4\uC57D +{0}"
+--- !u!135 &968401539
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 968401536}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.8
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!1 &970344895
 GameObject:
   m_ObjectHideFlags: 0
@@ -12635,7 +12871,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c2dfe70bdb3ac94f8f1901d88365585, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.PatrolRoute
-  waitSeconds: 1.2
+  waitSeconds: 0.6
   points: []
   gizmoColor: {r: 0.4, g: 0.9, b: 1, a: 1}
 --- !u!4 &1005255939
@@ -13125,6 +13361,7 @@ MonoBehaviour:
   shoutLoudness: 1
   shoutRadius: 12
   shoutCooldown: 6
+  flashlights: []
 --- !u!114 &1034100559
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13799,12 +14036,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c2dfe70bdb3ac94f8f1901d88365585, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.PatrolRoute
-  waitSeconds: 1.2
-  points:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  waitSeconds: 0.6
+  points: []
   gizmoColor: {r: 0.4, g: 0.9, b: 1, a: 1}
 --- !u!1 &1072038410
 GameObject:
@@ -17216,7 +17449,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c2dfe70bdb3ac94f8f1901d88365585, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.PatrolRoute
-  waitSeconds: 1.2
+  waitSeconds: 0.6
   points: []
   gizmoColor: {r: 0.4, g: 0.9, b: 1, a: 1}
 --- !u!4 &1333300273
@@ -17410,7 +17643,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c2dfe70bdb3ac94f8f1901d88365585, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.PatrolRoute
-  waitSeconds: 1.2
+  waitSeconds: 0.6
   points: []
   gizmoColor: {r: 0.4, g: 0.9, b: 1, a: 1}
 --- !u!4 &1349541171
@@ -19675,6 +19908,7 @@ MonoBehaviour:
   shoutLoudness: 1
   shoutRadius: 12
   shoutCooldown: 6
+  flashlights: []
 --- !u!114 &1556625621
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20431,6 +20665,7 @@ MonoBehaviour:
   shoutLoudness: 1
   shoutRadius: 12
   shoutCooldown: 6
+  flashlights: []
 --- !u!114 &1570468241
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21468,6 +21703,41 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1639629206}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1641422711
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1641422712}
+  m_Layer: 0
+  m_Name: Pickups
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1641422712
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1641422711}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1757691752}
+  - {fileID: 968401537}
+  - {fileID: 104778028}
+  - {fileID: 1292636}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1660821425
 GameObject:
   m_ObjectHideFlags: 0
@@ -22467,6 +22737,85 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1749658671}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1757691751
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1757691752}
+  - component: {fileID: 1757691754}
+  - component: {fileID: 1757691753}
+  m_Layer: 0
+  m_Name: Ammo_c12_r17
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1757691752
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1757691751}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 25, y: 0, z: 35}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1641422712}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1757691753
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1757691751}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f6aa8ba01c3660459818e0dd0840207, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.Combat.AmmoPickup
+  amount: 2
+  triggerRadius: 0.8
+  triggerHeight: 0.9
+  visual: {fileID: 0}
+  visualPrefab: {fileID: 0}
+  boxSize: {x: 0.35, y: 0.22, z: 0.26}
+  boxMaterial: {fileID: 0}
+  boxColor: {r: 1, g: 0.72, b: 0.2, a: 1}
+  hoverHeight: 0.45
+  bobAmplitude: 0.06
+  bobPeriod: 1.6
+  spinDegreesPerSecond: 60
+  flashFormat: "\uD0C4\uC57D +{0}"
+--- !u!135 &1757691754
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1757691751}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.8
+  m_Center: {x: 0, y: 0.9, z: 0}
 --- !u!1 &1760233100
 GameObject:
   m_ObjectHideFlags: 0
@@ -22799,12 +23148,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c2dfe70bdb3ac94f8f1901d88365585, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.PatrolRoute
-  waitSeconds: 1.2
-  points:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  waitSeconds: 0.6
+  points: []
   gizmoColor: {r: 0.4, g: 0.9, b: 1, a: 1}
 --- !u!1 &1812867593
 GameObject:
@@ -24418,6 +24763,7 @@ MonoBehaviour:
   shoutLoudness: 1
   shoutRadius: 12
   shoutCooldown: 6
+  flashlights: []
 --- !u!114 &1930149981
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25167,12 +25513,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c2dfe70bdb3ac94f8f1901d88365585, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ByAWhisker.Game::ByAWhisker.AI.PatrolRoute
-  waitSeconds: 1.2
-  points:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  waitSeconds: 0.6
+  points: []
   gizmoColor: {r: 0.4, g: 0.9, b: 1, a: 1}
 --- !u!1 &2024657553
 GameObject:
@@ -25434,6 +25776,7 @@ MonoBehaviour:
   shoutLoudness: 1
   shoutRadius: 12
   shoutCooldown: 6
+  flashlights: []
 --- !u!114 &2041584593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26180,6 +26523,7 @@ MonoBehaviour:
   shoutLoudness: 1
   shoutRadius: 12
   shoutCooldown: 6
+  flashlights: []
 --- !u!114 &2108297460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27205,3 +27549,4 @@ SceneRoots:
   - {fileID: 1382546211}
   - {fileID: 737675948}
   - {fileID: 1491463895}
+  - {fileID: 1641422712}

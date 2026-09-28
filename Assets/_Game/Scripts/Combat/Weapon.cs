@@ -169,6 +169,20 @@ namespace ByAWhisker.Combat
             _reserve -= taken;
         }
 
+        /// <summary>
+        /// 예비탄을 더한다. 주운 탄약(AmmoPickup)이 부른다. 더했으면 true.
+        /// 무한(음수)인 총에는 더할 것이 없어 false를 돌려준다. 그래야 줍는 쪽이 헛되이 사라지지 않고
+        /// 제자리에 남는다. 탄창에 바로 넣지 않는 것은 Reload와 같은 이유다. 장전은 플레이어가 고르는 순간이다.
+        /// </summary>
+        public bool AddReserve(int amount)
+        {
+            if (amount <= 0) return false;
+            if (_reserve < 0) return false;
+
+            _reserve += amount;
+            return true;
+        }
+
         /// <summary>재시작용. 장전 중이던 것도 없던 일로 하고 탄창과 예비탄을 설정값으로 되돌린다.</summary>
         public void RefillAmmo()
         {
@@ -228,6 +242,11 @@ namespace ByAWhisker.Combat
         /// <summary>
         /// 총성은 같은 오브젝트의 NoiseEmitter로 낸다. 발소리와 같은 통로를 써야 듣는 쪽이
         /// 자기 청각으로 똑같이 거를 수 있다. 소음기는 크기만 줄이고 소리를 없애지는 않는다.
+        ///
+        /// 설정에 반경(noiseRadius)이 적혀 있으면 그것을 쓴다. 발소리 통로의 비율(크기×radiusPerLoudness)로는
+        /// 크기 1이 12m뿐이고 경비의 약한 귀(×0.6)를 거치면 7m 남짓이라, 총을 쏴도 옆방이 모른다.
+        /// 반경이 없으면(0 이하) 예전 그대로 에미터가 크기에서 계산한다. 경비 소총이 이 길을 탄다.
+        /// 소음기는 적힌 반경에도 같은 배율을 곱한다. 안 그러면 소음기가 반경에는 아무 일도 하지 않는다.
         /// </summary>
         private void EmitGunshot()
         {
@@ -236,7 +255,15 @@ namespace ByAWhisker.Combat
             float loudness = settings.noiseLoudness;
             if (settings.suppressed) loudness *= suppressedNoiseScale;
 
-            noise.EmitOnce(loudness, NoiseKind.Gunshot);
+            float radius = settings.noiseRadius;
+            if (radius <= 0f)
+            {
+                noise.EmitOnce(loudness, NoiseKind.Gunshot);
+                return;
+            }
+
+            if (settings.suppressed) radius *= suppressedNoiseScale;
+            noise.EmitOnce(loudness, NoiseKind.Gunshot, radius);
         }
     }
 }

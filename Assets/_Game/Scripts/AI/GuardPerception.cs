@@ -125,6 +125,20 @@ namespace ByAWhisker.AI
         /// <summary>그 몸이 누워 있는 자리. 못 본 적이 없으면 자기 위치다.</summary>
         public Vector3 LastBodyPosition { get; private set; }
 
+        // 기지 경계가 오르면 GuardBrain이 줄인다. 프로필 에셋은 경비 열둘이 나눠 쓰므로 거기를 고치면 안 된다.
+        private float _detectTimeScale = 1f;
+
+        /// <summary>
+        /// 발각까지 걸리는 시간(SenseProfile.detectSeconds)에 곱하는 배율. 1보다 작으면 더 빨리 알아챈다.
+        /// 기지 경계 단계(StationAlert)에 맞춰 GuardBrain이 넣어 준다. 재시작해도 여기서는 되돌리지 않는다.
+        /// 단계가 0으로 돌아가면 두뇌가 1을 다시 넣는다.
+        /// </summary>
+        public float DetectTimeScale
+        {
+            get { return _detectTimeScale; }
+            set { _detectTimeScale = Mathf.Max(0.05f, value); }
+        }
+
         public Vector3 EyePosition
         {
             get
@@ -202,16 +216,19 @@ namespace ByAWhisker.AI
         /// <summary>
         /// 두뇌가 이 몸을 단서로 받아들였다. 그 자리를 마지막 단서로 적고,
         /// 같은 몸에 다시 놀라지 않게 기억해 둔다. 안 그러면 경비가 시체 옆에 붙박인다.
+        /// 받아들인 몸을 돌려준다. 기지 경계(StationAlert)가 서로 다른 몸을 세는 데 쓴다. 없으면 null이다.
         /// </summary>
-        public void AcknowledgeBody()
+        public Damageable AcknowledgeBody()
         {
-            if (!SeesBody) return;
+            if (!SeesBody) return null;
 
-            if (_visibleBody != null) _handledBodies.Add(_visibleBody.GetInstanceID());
+            Damageable body = _visibleBody;
+            if (body != null) _handledBodies.Add(body.GetInstanceID());
             _visibleBody = null;
 
             LastKnownPosition = LastBodyPosition;
             SeesBody = false;
+            return body;
         }
 
         private void OnDisable()
@@ -289,7 +306,8 @@ namespace ByAWhisker.AI
             {
                 LastKnownPosition = _player.position;
 
-                float seconds = Mathf.Max(0.01f, profile.detectSeconds);
+                // 기지 경계가 오르면 배율이 1보다 작아져 같은 거리에서도 더 빨리 찬다.
+                float seconds = Mathf.Max(0.01f, profile.detectSeconds * _detectTimeScale);
                 // 거리가 멀수록 천천히 찬다. 코앞이면 detectSeconds 그대로 걸린다.
                 float closeness = range > 0.001f ? Mathf.Clamp01(distance / range) : 0f;
                 float scale = Mathf.Lerp(1f, farDetectScale, closeness);

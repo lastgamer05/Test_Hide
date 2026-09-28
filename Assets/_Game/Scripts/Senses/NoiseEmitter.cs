@@ -147,12 +147,23 @@ namespace ByAWhisker.Senses
         /// <summary>소리를 한 번 낸다. 부딪힘이나 총성처럼 발걸음이 아닌 소리는 밖에서 이걸 부른다.</summary>
         public void EmitOnce(float loudness, NoiseKind kind)
         {
+            // 반경을 0으로 넘기면 아래에서 크기로 계산한다. 예전과 한 치도 다르지 않다.
+            EmitOnce(loudness, kind, 0f);
+        }
+
+        /// <summary>
+        /// 반경을 직접 정해 소리를 낸다. 총성처럼 발소리 비율(크기×radiusPerLoudness)로는 모자라게
+        /// 멀리 가야 하는 소리가 쓴다. radius가 0 이하면 크기로 계산하는 원래 규칙을 따른다.
+        /// 크기(loudness)는 여전히 0..1로 다듬어 싣는다. 듣는 쪽이 여러 소리 중 가장 큰 것을 고를 때 쓰기 때문이다.
+        /// </summary>
+        public void EmitOnce(float loudness, NoiseKind kind, float radius)
+        {
             loudness = Mathf.Clamp01(loudness);
             if (loudness <= 0f) return;
 
             NoiseEvent evt;
             evt.position = transform.position;
-            evt.radius = loudness * radiusPerLoudness;
+            evt.radius = radius > 0f ? radius : loudness * radiusPerLoudness;
             evt.loudness = loudness;
             evt.kind = kind;
             // 자기가 낸 소리를 스스로 듣고 놀라지 않도록 듣는 쪽이 걸러 낼 수 있게 주인을 적어 둔다.

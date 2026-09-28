@@ -1,5 +1,6 @@
 using UnityEngine;
 using ByAWhisker.Combat;
+using ByAWhisker.Core;
 
 namespace ByAWhisker.Player
 {
@@ -47,6 +48,25 @@ namespace ByAWhisker.Player
             if (exposure == null) exposure = GetComponent<PlayerExposure>();
 
             AimDirection = transform.forward;
+
+            // 구독을 OnEnable이 아니라 Awake에서 한다. 플레이어가 총에 맞으면 Damageable이 이 컴포넌트를
+            // 끄는데, 그러면 OnDisable에서 구독이 풀려 재시작 신호를 놓친다. Lamp와 같은 이유다.
+            GameEvents.RunReset += HandleRunReset;
+        }
+
+        private void OnDestroy()
+        {
+            GameEvents.RunReset -= HandleRunReset;
+        }
+
+        /// <summary>
+        /// 재시작하면 탄약도 판을 시작할 때로 돌린다. 경비 총은 GuardGunner가 같은 일을 한다.
+        /// 주운 탄약(AmmoPickup)도 재시작에 제자리로 돌아오므로, 이걸 안 하면 잡혔다 다시 줍기를
+        /// 되풀이해 탄을 무한히 모을 수 있다. 탄이 세 발뿐인 게임에서 그 구멍은 치명적이다.
+        /// </summary>
+        private void HandleRunReset()
+        {
+            if (weapon != null) weapon.RefillAmmo();
         }
 
         private void OnEnable()

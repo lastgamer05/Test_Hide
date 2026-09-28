@@ -37,5 +37,10 @@ namespace ByAWhisker.Combat
         [Tooltip("소음기 없이 쐈을 때의 총성 크기. 0..1. NoiseEmitter로 그대로 넘긴다.")]
         [Range(0f, 1f)]
         public float noiseLoudness = 1f;
+
+        [Tooltip("총성이 들리는 거리(m). 0 이하면 NoiseEmitter가 크기에서 계산한다(크기×radiusPerLoudness, 크기 1이면 12m). " +
+                 "사람 경비는 SenseProfile.hearingMultiplier(0.6)만큼 줄여 들으니 30이면 18m 안의 경비가 듣는다. " +
+                 "소음기를 달면 이 값에도 소음기 배율이 곱해진다.")]
+        public float noiseRadius = 0f;
     }
 }

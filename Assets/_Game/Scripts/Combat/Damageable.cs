@@ -172,9 +172,11 @@ namespace ByAWhisker.Combat
             // 콜라이더는 끄지 않고 트리거로 바꾼다. 꺼 버리면 시체를 물리로 찾을 수 없어서
             // 경비가 시체를 발견하지도, 플레이어가 시체를 들지도 못한다.
             // 총알(Weapon)과 시선(Sight)은 둘 다 트리거를 무시하므로, 뚫고 지나가는 성질은 그대로다.
+            // CharacterController는 트리거가 될 수 없어서 대입하면 오류를 낸다. 플레이어 몸이 그렇다.
+            // 플레이어 시체는 곧 재시작으로 사라지니 그대로 둔다.
             for (int i = 0; i < _colliders.Length; i++)
             {
-                if (_colliders[i] != null) _colliders[i].isTrigger = true;
+                if (_colliders[i] != null && !(_colliders[i] is CharacterController)) _colliders[i].isTrigger = true;
             }
 
             for (int i = 0; i < _behaviours.Length; i++)
@@ -189,7 +191,7 @@ namespace ByAWhisker.Combat
             {
                 if (_colliders[i] == null) continue;
                 _colliders[i].enabled = _colliderWasEnabled[i];
-                _colliders[i].isTrigger = _colliderWasTrigger[i];
+                if (!(_colliders[i] is CharacterController)) _colliders[i].isTrigger = _colliderWasTrigger[i];
             }
         }
 

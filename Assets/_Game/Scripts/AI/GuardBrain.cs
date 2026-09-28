@@ -1,6 +1,7 @@
 using UnityEngine;
 using ByAWhisker.Combat;
 using ByAWhisker.Core;
+using ByAWhisker.Perception;
 using ByAWhisker.Senses;
 
 namespace ByAWhisker.AI
@@ -68,6 +69,12 @@ namespace ByAWhisker.AI
         [Tooltip("한 번 외친 뒤 다시 외치기까지의 최소 간격(초). 없으면 Alert를 들락거릴 때마다 외친다.")]
         [SerializeField] private float shoutCooldown = 6f;
 
+        [Header("기지 경계")]
+        [Tooltip(
+            "경계 단계가 오르면 반경을 늘릴 손전등. 비우면 자식에서 LightSource를 모두 모은다. " +
+            "배율은 StationAlert.Settings에서 읽는다.")]
+        [SerializeField] private LightSource[] flashlights;
+
         private Vector3 _spawnPosition;
         private Quaternion _spawnRotation;
 
@@ -84,6 +91,17 @@ namespace ByAWhisker.AI
         private bool _underFire;      // 이번에 총격을 받았다. 한 프레임짜리 신호라 Update가 소비한다
         private float _coverReadyTime; // 이 시각이 지나야 다시 숨는다
         private float _shoutReadyTime; // 이 시각이 지나야 다시 외친다
+
+        // 기지 경계 단계가 곱하는 배율. 원래 값(patrolSpeed, searchSeconds, route.waitSeconds)은 건드리지 않고
+        // 쓸 때만 곱한다. 그래야 단계가 0으로 돌아가면 그대로 원래 값이 된다.
+        private float _patrolSpeedScale = 1f;
+        private float _waitScale = 1f;
+        private float _searchTimeScale = 1f;
+
+        // 손전등의 원래 반경과 보이는 조명의 원래 사거리. 늘 여기서부터 곱해야 몇 번을 올려도 되돌릴 수 있다.
+        private float[] _flashlightBaseRadius;
+        private Light[] _flashlightLights;
+        private float[] _flashlightBaseRange;
 
         public State Current { get; private set; }
         public event System.Action<State> StateChanged;
@@ -115,6 +133,10 @@ namespace ByAWhisker.AI
             // 소음기를 단 총은 소리가 작아 못 들을 수 있어서 둘 중 하나로는 모자란다.
             NoiseBus.Emitted += HandleNoise;
             if (_body != null) _body.Damaged += HandleDamaged;
+
+            // 꺼져 있던 사이에 단계가 올랐을 수 있으니 켜지는 순간 지금 단계를 한 번 받아 둔다.
+            StationAlert.LevelChanged += HandleAlertLevel;
+            HandleAlertLevel(StationAlert.Level);
         }
 
         private void OnDisable()
@@ -123,6 +145,102 @@ namespace ByAWhisker.AI
 
             NoiseBus.Emitted -= HandleNoise;
             if (_body != null) _body.Damaged -= HandleDamaged;
+
+            StationAlert.LevelChanged -= HandleAlertLevel;
+        }
+
+        /// <summary>
+        /// 기지 경계 단계가 바뀌었다. 걸음과 손전등과 눈만 바꾼다.
+        /// 상태도, 마지막 단서(LastKnownPosition)도 건드리지 않는다. 시체를 못 본 경비가
+        /// 단계가 올랐다는 이유만으로 늑대의 자리를 알게 되면 몰래 지나갈 길이 통째로 사라진다.
+        /// </summary>
+        private void HandleAlertLevel(int level)
+        {
+            StationAlertSettings.Tier tier = StationAlert.Settings.TierFor(level);
+
+            _patrolSpeedScale = Mathf.Max(0.01f, tier.patrolSpeedScale);
+            _waitScale = Mathf.Max(0f, tier.waitScale);
+            _searchTimeScale = Mathf.Max(0.01f, tier.searchTimeScale);
+
+            if (perception != null) perception.DetectTimeScale = tier.detectTimeScale;
+
+            ScaleFlashlights(tier.flashlightRangeScale);
+        }
+
+        /// <summary>
+        /// 손전등 반경을 원래 값에서 곱한다. 판정(LightSource.radius)과 보이는 스포트라이트(Light.range)를
+        /// 같이 바꿔야 바닥의 부채꼴(FlashlightCone)과 실제 빛이 어긋나지 않는다. FlashlightCone은
+        /// radius가 바뀐 프레임에만 정점을 다시 채우므로 여기서 한 번 바꾸는 것으로 충분하다.
+        /// </summary>
+        private void ScaleFlashlights(float scale)
+        {
+            CacheFlashlights();
+            if (flashlights == null) return;
+
+            scale = Mathf.Max(0.01f, scale);
+            for (int i = 0; i < flashlights.Length; i++)
+            {
+                if (flashlights[i] == null) continue;
+                flashlights[i].radius = _flashlightBaseRadius[i] * scale;
+                if (_flashlightLights[i] != null) _flashlightLights[i].range = _flashlightBaseRange[i] * scale;
+            }
+        }
+
+        /// <summary>
+        /// 원래 반경을 한 번만 적어 둔다. Awake가 아니라 처음 쓸 때 적는 것은, 씬이 다 깨어나 값이
+        /// 제자리를 잡은 뒤(OnEnable)의 값이어야 하기 때문이다. 한 번 적은 뒤로는 절대 다시 적지 않는다.
+        /// 늘어난 값을 원래 값으로 잘못 적으면 단계가 오를 때마다 손전등이 끝없이 길어진다.
+        /// </summary>
+        private void CacheFlashlights()
+        {
+            if (_flashlightBaseRadius != null) return;
+
+            if (flashlights == null || flashlights.Length == 0)
+            {
+                // 꺼진 자식까지 모은다. 죽어서 꺼진 손전등도 되살아나면 같은 배율을 받아야 한다.
+                flashlights = GetComponentsInChildren<LightSource>(true);
+            }
+
+            _flashlightBaseRadius = new float[flashlights.Length];
+            _flashlightLights = new Light[flashlights.Length];
+            _flashlightBaseRange = new float[flashlights.Length];
+
+            for (int i = 0; i < flashlights.Length; i++)
+            {
+                if (flashlights[i] == null) continue;
+                _flashlightBaseRadius[i] = flashlights[i].radius;
+
+                // LightSource가 같이 켜고 끄는 실제 조명과 같은 것을 찾는다. 비공개 필드라 같은 오브젝트에서 다시 찾는다.
+                Light unityLight = flashlights[i].GetComponent<Light>();
+                _flashlightLights[i] = unityLight;
+                _flashlightBaseRange[i] = unityLight != null ? unityLight.range : 0f;
+            }
+        }
+
+        /// <summary>순찰 걸음. 기지 경계 배율을 곱한 값이다.</summary>
+        private float PatrolSpeed
+        {
+            get { return patrolSpeed * _patrolSpeedScale; }
+        }
+
+        /// <summary>
+        /// 쓰러진 몸을 받아들인 뒤 기지에 알린다. 처음 보는 몸이면 경계 단계가 오르고,
+        /// 설정에 따라 발견한 경비가 소리친다. 외침은 이 경비의 자리에서 나므로 동료는 시체 쪽으로 오고,
+        /// 플레이어의 자리는 알지 못한다.
+        /// </summary>
+        private void ReportBody(Damageable found)
+        {
+            Vector3 where = perception != null ? perception.LastBodyPosition : transform.position;
+
+            // 누구 몸인지 모르면 셀 수가 없다. 그래도 무언가 본 것은 맞으니 경계까지만 올리고 외치지는 않는다.
+            if (found == null)
+            {
+                StationAlert.Raise(StationAlert.Raised, where);
+                return;
+            }
+
+            bool fresh = StationAlert.ReportBody(found.GetInstanceID(), where);
+            if (fresh && StationAlert.Settings.shoutOnBody) Shout();
         }
 
         /// <summary>뒤에서 기절당했을 때. 그동안 이동도 판정도 멈춘다.</summary>
@@ -222,7 +340,9 @@ namespace ByAWhisker.AI
             if (perception.SeesBody && Current != State.Alert && Current != State.Attack && Current != State.TakeCover)
             {
                 // 받아들이는 순간 뒤질 자리가 시체 자리로 바뀐다. 같은 몸에 두 번 놀라지는 않는다.
-                perception.AcknowledgeBody();
+                Damageable found = perception.AcknowledgeBody();
+                // 기지에 알리는 것은 받아들인 뒤다. 외침이 나가기 전에 뒤질 자리가 먼저 시체 자리로 바뀌어 있어야 한다.
+                ReportBody(found);
                 Enter(State.Search);
                 // 이미 Search 중이었다면 Enter가 아무 일도 하지 않으니 여기서 둘러보기를 다시 시작한다.
                 _stateTimer = 0f;
@@ -243,16 +363,17 @@ namespace ByAWhisker.AI
                 if (_waitTimer <= 0f)
                 {
                     _patrolIndex++;
-                    motor.MoveTo(route.PointAt(_patrolIndex), patrolSpeed);
+                    motor.MoveTo(route.PointAt(_patrolIndex), PatrolSpeed);
                 }
                 return;
             }
 
-            motor.MoveTo(route.PointAt(_patrolIndex), patrolSpeed);
+            motor.MoveTo(route.PointAt(_patrolIndex), PatrolSpeed);
             if (motor.ReachedDestination)
             {
                 motor.Stop();
-                _waitTimer = Mathf.Max(0.01f, route.waitSeconds);
+                // 기지가 뒤숭숭할수록 한자리에 오래 서 있지 않는다. 경로 에셋의 값은 그대로 두고 쓸 때만 곱한다.
+                _waitTimer = Mathf.Max(0.01f, route.waitSeconds * _waitScale);
             }
         }
 
@@ -292,7 +413,7 @@ namespace ByAWhisker.AI
             }
 
             LookAround(dt);
-            if (_stateTimer >= searchSeconds) Enter(State.Patrol);
+            if (_stateTimer >= searchSeconds * _searchTimeScale) Enter(State.Patrol);
         }
 
         /// <summary>제자리에서 방향을 바꿔 가며 훑어본다.</summary>
@@ -533,7 +654,7 @@ namespace ByAWhisker.AI
                 case State.Patrol:
                     if (motor != null && route != null && route.Count > 0)
                     {
-                        motor.MoveTo(route.PointAt(_patrolIndex), patrolSpeed);
+                        motor.MoveTo(route.PointAt(_patrolIndex), PatrolSpeed);
                     }
                     break;
 
@@ -546,6 +667,9 @@ namespace ByAWhisker.AI
                     // 들킨 순간 경비가 소리를 지른다. 화면 효과와 달리 이건 세계 안에서 벌어지는 일이라
                     // 동료가 실제로 듣고 오고, 플레이어도 집중 중이면 고리로 어디서 났는지 본다.
                     Shout();
+                    // 누군가 늑대를 똑똑히 봤으니 기지 전체가 비상이 된다. 이미 비상이면 아무 일도 없다.
+                    // 올리는 것은 분위기뿐이다. 다른 경비에게 자리를 넘기는 일은 외침과 동료 전파가 따로 맡는다.
+                    StationAlert.Raise(StationAlert.Emergency, transform.position);
                     break;
 
                 case State.Stunned:

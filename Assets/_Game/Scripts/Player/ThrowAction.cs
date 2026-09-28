@@ -169,17 +169,19 @@ namespace ByAWhisker.Player
 
             _remaining = Mathf.Max(0, stoneCount);
             BuildStone();
+
+            // 재시작 신호는 Awake에서 받는다. 플레이어가 쓰러지면 Damageable이 이 컴포넌트를 끄는데,
+            // OnEnable에서 받으면 꺼진 동안 오는 RunReset을 놓쳐서 돌 개수가 다시 차지 않는다.
+            GameEvents.RunReset += HandleRunReset;
         }
 
         private void OnEnable()
         {
-            GameEvents.RunReset += HandleRunReset;
             if (input != null) input.ThrowRequested += HandleThrowRequested;
         }
 
         private void OnDisable()
         {
-            GameEvents.RunReset -= HandleRunReset;
             if (input != null) input.ThrowRequested -= HandleThrowRequested;
 
             // 꺼지면 Update가 멈춘다. 접어 두지 않으면 날아가던 돌이 그 자리에 얼어붙는다.
@@ -189,6 +191,8 @@ namespace ByAWhisker.Player
 
         private void OnDestroy()
         {
+            GameEvents.RunReset -= HandleRunReset;
+
             // 돌과 메시는 씬 루트에 따로 서 있다. 주인이 사라지면 같이 치운다.
             if (_stone != null) Destroy(_stone);
             if (_mesh != null) Destroy(_mesh);
